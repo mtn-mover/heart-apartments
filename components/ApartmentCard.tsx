@@ -3,8 +3,7 @@
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { Apartment, amenityIcons } from '@/data/apartments';
-import { cn } from '@/lib/utils';
+import { Apartment } from '@/data/apartments';
 
 interface ApartmentCardProps {
   apartment: Apartment;
@@ -14,8 +13,13 @@ interface ApartmentCardProps {
 export default function ApartmentCard({ apartment, priority = false }: ApartmentCardProps) {
   const locale = useLocale() as 'en' | 'de';
   const t = useTranslations('apartment');
-  const amenityT = useTranslations('amenities');
   const data = apartment[locale];
+  const { specs } = apartment;
+
+  // Format baths (1.5 -> "1.5")
+  const formatBaths = (baths: number) => {
+    return baths % 1 === 0 ? baths.toString() : baths.toFixed(1);
+  };
 
   return (
     <Link
@@ -33,11 +37,6 @@ export default function ApartmentCard({ apartment, priority = false }: Apartment
           priority={priority}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-        {/* Guest Badge */}
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-800">
-          👥 {t('upTo')} {apartment.specs.maxGuests} {t('guests')}
-        </div>
       </div>
 
       {/* Content */}
@@ -49,21 +48,15 @@ export default function ApartmentCard({ apartment, priority = false }: Apartment
           {data.subtitle}
         </p>
 
-        {/* Amenities */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {apartment.amenities.slice(0, 4).map((amenity) => {
-            const icon = amenityIcons[amenity];
-            if (!icon) return null;
-            return (
-              <span
-                key={amenity}
-                className="inline-flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-md text-xs text-gray-700"
-              >
-                <span>{icon.icon}</span>
-                <span>{amenityT(icon.key)}</span>
-              </span>
-            );
-          })}
+        {/* Airbnb-style Specs */}
+        <div className="text-sm text-gray-600 mb-4">
+          <span>{specs.guests} {specs.guests === 1 ? t('guest') : t('guests')}</span>
+          <span className="mx-1">·</span>
+          <span>{specs.bedrooms} {specs.bedrooms === 1 ? t('bedroom') : t('bedrooms')}</span>
+          <span className="mx-1">·</span>
+          <span>{specs.beds} {specs.beds === 1 ? t('bed') : t('beds')}</span>
+          <span className="mx-1">·</span>
+          <span>{formatBaths(specs.baths)} {specs.baths === 1 ? t('bath') : t('baths')}</span>
         </div>
 
         {/* View Details Button */}

@@ -18,6 +18,13 @@
   },
   "apartment": {
     "guests": "guests",
+    "guest": "guest",
+    "bedrooms": "bedrooms",
+    "bedroom": "bedroom",
+    "beds": "beds",
+    "bed": "bed",
+    "baths": "baths",
+    "bath": "bath",
     "upTo": "Up to",
     "bookNow": "Book on Airbnb",
     "viewDetails": "View Details",

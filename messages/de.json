@@ -18,6 +18,13 @@
   },
   "apartment": {
     "guests": "Gäste",
+    "guest": "Gast",
+    "bedrooms": "Schlafzimmer",
+    "bedroom": "Schlafzimmer",
+    "beds": "Betten",
+    "bed": "Bett",
+    "baths": "Bäder",
+    "bath": "Bad",
     "upTo": "Bis zu",
     "bookNow": "Auf Airbnb buchen",
     "viewDetails": "Details ansehen",

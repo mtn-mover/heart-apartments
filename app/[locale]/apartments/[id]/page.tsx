@@ -64,7 +64,13 @@ function ApartmentDetailContent({ id }: { id: string }) {
 
   const apartment = getApartmentById(id)!;
   const data = apartment[locale];
+  const { specs } = apartment;
   const otherApartments = getOtherApartments(id).slice(0, 3);
+
+  // Format baths (1.5 -> "1.5")
+  const formatBaths = (baths: number) => {
+    return baths % 1 === 0 ? baths.toString() : baths.toFixed(1);
+  };
 
   return (
     <div className="min-h-screen">
@@ -98,6 +104,18 @@ function ApartmentDetailContent({ id }: { id: string }) {
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 {data.title}
               </h1>
+
+              {/* Airbnb-style Specs */}
+              <div className="text-gray-600 mb-4">
+                <span>{specs.guests} {specs.guests === 1 ? t('guest') : t('guests')}</span>
+                <span className="mx-2">·</span>
+                <span>{specs.bedrooms} {specs.bedrooms === 1 ? t('bedroom') : t('bedrooms')}</span>
+                <span className="mx-2">·</span>
+                <span>{specs.beds} {specs.beds === 1 ? t('bed') : t('beds')}</span>
+                <span className="mx-2">·</span>
+                <span>{formatBaths(specs.baths)} {specs.baths === 1 ? t('bath') : t('baths')}</span>
+              </div>
+
               <p className="text-gray-600 mb-6">{data.subtitle}</p>
 
               <div className="prose prose-gray max-w-none">
@@ -157,10 +175,26 @@ function ApartmentDetailContent({ id }: { id: string }) {
           {/* Right Column - Booking Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              {/* Guest Info */}
-              <div className="flex items-center justify-center space-x-2 text-lg font-semibold text-gray-900 mb-6">
-                <span>👥</span>
-                <span>{t('upTo')} {apartment.specs.maxGuests} {t('guests')}</span>
+              {/* Airbnb-style Specs in Sidebar */}
+              <div className="text-center mb-6 pb-6 border-b">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">👥</div>
+                    <div className="text-sm text-gray-600">{specs.guests} {t('guests')}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🛏️</div>
+                    <div className="text-sm text-gray-600">{specs.bedrooms} {t('bedrooms')}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🛋️</div>
+                    <div className="text-sm text-gray-600">{specs.beds} {t('beds')}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🚿</div>
+                    <div className="text-sm text-gray-600">{formatBaths(specs.baths)} {t('baths')}</div>
+                  </div>
+                </div>
               </div>
 
               {/* Quick Amenities */}

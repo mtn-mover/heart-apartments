@@ -23,7 +23,10 @@ export type Apartment = {
     idealFor: string[];
   };
   specs: {
-    maxGuests: number;
+    guests: number;
+    bedrooms: number;
+    beds: number;
+    baths: number; // e.g., 1.5 for 1 full bath + 1 half bath
   };
   amenities: string[];
   images: ApartmentImage[];
@@ -50,7 +53,10 @@ export const apartments: Apartment[] = [
       idealFor: ['Familien', 'Paare', 'Gruppen für Jungfrau-Erkundung'],
     },
     specs: {
-      maxGuests: 4,
+      guests: 4,
+      bedrooms: 2,
+      beds: 3,
+      baths: 1.5,
     },
     amenities: ['ac', 'elevator', 'wifi', 'kitchen', 'patio'],
     images: [
@@ -97,7 +103,10 @@ export const apartments: Apartment[] = [
       idealFor: ['Familien', 'Paare', 'Abenteuersuchende'],
     },
     specs: {
-      maxGuests: 4,
+      guests: 4,
+      bedrooms: 2,
+      beds: 4,
+      baths: 1.5,
     },
     amenities: ['ac', 'elevator', 'wifi', 'kitchen', 'balcony'],
     images: [
@@ -142,7 +151,10 @@ export const apartments: Apartment[] = [
       idealFor: ['Familien', 'Gruppen', 'Bergliebhaber'],
     },
     specs: {
-      maxGuests: 4,
+      guests: 4,
+      bedrooms: 2,
+      beds: 3,
+      baths: 1.5,
     },
     amenities: ['ac', 'elevator', 'wifi', 'kitchen', 'patio'],
     images: [
@@ -190,7 +202,10 @@ export const apartments: Apartment[] = [
       idealFor: ['Familien', 'Paare', 'Wanderer'],
     },
     specs: {
-      maxGuests: 4,
+      guests: 4,
+      bedrooms: 1,
+      beds: 4,
+      baths: 1,
     },
     amenities: ['ac', 'elevator', 'wifi', 'kitchen'],
     images: [
@@ -235,7 +250,10 @@ export const apartments: Apartment[] = [
       idealFor: ['Paare', 'Familien', 'Kulturliebhaber'],
     },
     specs: {
-      maxGuests: 4,
+      guests: 4,
+      bedrooms: 2,
+      beds: 3,
+      baths: 1,
     },
     amenities: ['wifi', 'kitchen', 'charm', 'traditional'],
     images: [
