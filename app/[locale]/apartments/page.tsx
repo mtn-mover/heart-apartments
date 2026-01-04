@@ -4,7 +4,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { apartments } from '@/data/apartments';
 import ApartmentCard from '@/components/ApartmentCard';
-import { Link } from '@/i18n/navigation';
 
 export const metadata: Metadata = {
   title: 'Our Apartments',
@@ -24,7 +23,6 @@ export default async function ApartmentsPage({
 
 function ApartmentsPageContent() {
   const t = useTranslations('home');
-  const nav = useTranslations('nav');
 
   return (
     <div className="min-h-screen">
@@ -44,15 +42,6 @@ function ApartmentsPageContent() {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="flex items-center justify-center space-x-2 text-sm mb-6">
-            <Link href="/" className="text-white/70 hover:text-white transition-colors">
-              {nav('home')}
-            </Link>
-            <span className="text-white/50">/</span>
-            <span className="text-white font-medium">{nav('apartments')}</span>
-          </nav>
-
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 font-heading">
             {t('featuredTitle')}
           </h1>
