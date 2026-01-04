@@ -44,7 +44,7 @@ function HomePageContent() {
             quality={90}
             className="w-full h-auto"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/30 via-transparent to-slate-900/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900/60" />
 
           {/* Hero Content - Positioned over image, lower position */}
           <div className="absolute inset-0 flex items-end justify-center">
