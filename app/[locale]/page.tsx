@@ -48,7 +48,7 @@ function HomePageContent() {
 
           {/* Hero Content - Positioned over image, lower position */}
           <div className="absolute inset-0 flex items-end justify-center">
-            <div className="text-center px-4 max-w-5xl mx-auto pb-4 md:pb-10">
+            <div className="text-center px-4 max-w-5xl mx-auto">
               {/* Main Heading */}
               <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
                 {t('heroTitle')}
