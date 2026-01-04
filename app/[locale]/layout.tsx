@@ -29,6 +29,14 @@ export const metadata: Metadata = {
   description: 'Discover 5 beautiful apartments in central Interlaken, perfect for exploring the Swiss Alps and Jungfrau region. Superhost since 2016.',
   keywords: ['Interlaken apartments', 'Swiss Alps accommodation', 'Jungfrau region', 'vacation rental Interlaken', 'Switzerland holiday', 'Opal Heart Guesthouse', 'Superhost Interlaken'],
   authors: [{ name: 'Opal Heart Guesthouse' }],
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: 'Opal Heart Guesthouse - Your Alpine Sanctuary in Interlaken',
     description: 'Luxury apartments in central Interlaken, Switzerland. Superhost since 2016.',

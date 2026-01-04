@@ -32,36 +32,50 @@ function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center">
+      <section className="relative h-screen min-h-[600px] flex items-center justify-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/heart1/heards_1_1_dining_area.jpg"
-            alt="Opal Heart Guesthouse - Interlaken"
+            src="/images/Hero1.jpg"
+            alt="Jungfrau Mountains at Sunset - Interlaken"
             fill
             priority
+            quality={90}
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/70" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 tracking-tight font-heading">
+        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+          {/* Logo */}
+          <div className="mb-8">
+            <Image
+              src="/images/favicon.png"
+              alt="Opal Heart"
+              width={80}
+              height={80}
+              className="mx-auto mb-4"
+              priority
+            />
+          </div>
+
+          {/* Main Heading */}
+          <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
             {t('heroTitle')}
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-2">
+
+          {/* Tagline */}
+          <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 font-light max-w-3xl mx-auto">
             {t('heroSubtitle')}
           </p>
-          <p className="text-lg text-white/70 mb-8 flex items-center justify-center">
-            <span className="mr-2">📍</span>
-            {t('heroLocation')}
-          </p>
+
+          {/* CTA Button */}
           <Link
             href="/apartments"
-            className="inline-flex items-center px-8 py-4 bg-opal-blue hover:bg-opal-teal text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+            className="inline-flex items-center px-10 py-4 bg-opal-blue hover:bg-opal-teal text-white font-medium text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
           >
-            {t('viewApartments')}
+            {t('heroCta')}
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

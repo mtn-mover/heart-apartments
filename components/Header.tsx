@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
+import Logo from './Logo';
 import { cn } from '@/lib/utils';
 
 export default function Header() {
@@ -30,10 +31,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl">💎</span>
-            <span className="text-xl font-bold text-slate-900 font-heading">Opal Heart</span>
-          </Link>
+          <Logo variant="horizontal" className="h-10 md:h-12 w-auto" />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">

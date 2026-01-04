@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import Image from 'next/image';
 
 export default function Footer() {
   const t = useTranslations('footer');
@@ -15,10 +16,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <span className="text-2xl">💎</span>
-              <span className="text-xl font-bold font-heading">Opal Heart Guesthouse</span>
-            </div>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/logo/logo_opal_heart.png"
+                alt="Opal Heart Guesthouse"
+                width={180}
+                height={54}
+                className="brightness-0 invert h-12 w-auto"
+              />
+            </Link>
             <p className="text-slate-400 text-sm">
               {t('tagline')}
             </p>
