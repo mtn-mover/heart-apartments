@@ -18,11 +18,11 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-block mb-4">
               <Image
-                src="/logo/logo_opal_heart.png"
+                src="/images/logo_opal_heart_inv.png"
                 alt="Opal Heart Guesthouse"
-                width={240}
-                height={72}
-                className="brightness-0 invert h-16 w-auto"
+                width={200}
+                height={60}
+                className="h-16 w-auto"
               />
             </Link>
             <p className="text-slate-400 text-sm">
