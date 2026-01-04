@@ -32,7 +32,7 @@ function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[600px] flex items-center justify-center">
+      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
