@@ -36,7 +36,7 @@ function HomePageContent() {
         {/* Background Image - Full height visible */}
         <div className="relative w-full">
           <Image
-            src="/images/Hero1_1.jpg"
+            src="/images/Hero1_2.jpg"
             alt="Jungfrau Mountains at Sunset - Interlaken"
             width={1920}
             height={1080}
