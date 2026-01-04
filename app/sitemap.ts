@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { apartments } from '@/data/apartments';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://heart-apartments.vercel.app';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://opal-heart-guesthouse.vercel.app';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const locales = ['en', 'de'];

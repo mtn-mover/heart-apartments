@@ -28,25 +28,25 @@ function ApartmentsPageContent() {
   return (
     <div className="min-h-screen">
       {/* Breadcrumb */}
-      <div className="bg-gray-50 py-4 border-b">
+      <div className="bg-opal-pearl py-4 border-b border-opal-blue/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center space-x-2 text-sm">
-            <Link href="/" className="text-gray-500 hover:text-gray-700">
+            <Link href="/" className="text-slate-500 hover:text-opal-blue transition-colors">
               {nav('home')}
             </Link>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-medium">{nav('apartments')}</span>
+            <span className="text-slate-400">/</span>
+            <span className="text-slate-900 font-medium">{nav('apartments')}</span>
           </nav>
         </div>
       </div>
 
       {/* Header */}
-      <section className="py-12 md:py-16 bg-gray-50">
+      <section className="py-12 md:py-16 bg-opal-pearl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 font-heading">
             {t('featuredTitle')}
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             {t('featuredSubtitle')}
           </p>
         </div>

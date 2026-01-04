@@ -25,8 +25,8 @@ export default function BookingCTA({
       rel="noopener noreferrer"
       className={cn(
         'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200',
-        variant === 'primary' && 'bg-rose-600 text-white hover:bg-rose-700 shadow-lg hover:shadow-xl',
-        variant === 'secondary' && 'bg-white text-rose-600 border-2 border-rose-600 hover:bg-rose-50',
+        variant === 'primary' && 'bg-opal-blue text-white hover:bg-opal-teal shadow-lg hover:shadow-xl hover:scale-105',
+        variant === 'secondary' && 'bg-white text-opal-blue border-2 border-opal-blue hover:bg-opal-pearl',
         size === 'default' && 'px-6 py-3 text-sm',
         size === 'large' && 'px-8 py-4 text-base',
         className

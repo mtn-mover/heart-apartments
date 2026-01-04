@@ -26,13 +26,13 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl">🏔️</span>
-            <span className="text-xl font-bold text-gray-900">HEART Apartments</span>
+            <span className="text-2xl">💎</span>
+            <span className="text-xl font-bold text-slate-900 font-heading">Opal Heart</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -42,8 +42,8 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-rose-600',
-                  isActive(item.href) ? 'text-rose-600' : 'text-gray-700'
+                  'text-sm font-medium transition-colors hover:text-opal-blue',
+                  isActive(item.href) ? 'text-opal-blue' : 'text-slate-700'
                 )}
               >
                 {item.label}
@@ -58,7 +58,7 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="md:hidden p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -77,7 +77,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-gray-100">
+          <nav className="md:hidden py-4 border-t border-slate-100">
             <div className="flex flex-col space-y-3">
               {navItems.map((item) => (
                 <Link
@@ -87,8 +87,8 @@ export default function Header() {
                   className={cn(
                     'px-3 py-2 rounded-md text-base font-medium transition-colors',
                     isActive(item.href)
-                      ? 'text-rose-600 bg-rose-50'
-                      : 'text-gray-700 hover:text-rose-600 hover:bg-gray-50'
+                      ? 'text-opal-blue bg-opal-pearl'
+                      : 'text-slate-700 hover:text-opal-blue hover:bg-slate-50'
                   )}
                 >
                   {item.label}

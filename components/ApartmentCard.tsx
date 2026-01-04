@@ -24,7 +24,7 @@ export default function ApartmentCard({ apartment, priority = false }: Apartment
   return (
     <Link
       href={`/apartments/${apartment.id}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -41,15 +41,15 @@ export default function ApartmentCard({ apartment, priority = false }: Apartment
 
       {/* Content */}
       <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-rose-600 transition-colors">
+        <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-opal-blue transition-colors font-heading">
           {apartment.name}
         </h3>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+        <p className="text-sm text-slate-600 mb-3 line-clamp-1">
           {data.subtitle}
         </p>
 
         {/* Airbnb-style Specs */}
-        <div className="text-sm text-gray-600 mb-4">
+        <div className="text-sm text-slate-600 mb-4">
           <span>{specs.guests} {specs.guests === 1 ? t('guest') : t('guests')}</span>
           <span className="mx-1">·</span>
           <span>{specs.bedrooms} {specs.bedrooms === 1 ? t('bedroom') : t('bedrooms')}</span>
@@ -61,7 +61,7 @@ export default function ApartmentCard({ apartment, priority = false }: Apartment
 
         {/* View Details Button */}
         <div className="flex items-center justify-between">
-          <span className="text-rose-600 font-medium text-sm group-hover:underline">
+          <span className="text-opal-blue font-medium text-sm group-hover:underline">
             {t('viewDetails')} →
           </span>
         </div>
