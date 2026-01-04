@@ -20,9 +20,9 @@ export default function Footer() {
               <Image
                 src="/images/logo_opal_heart_inv.png"
                 alt="Opal Heart Guesthouse"
-                width={200}
-                height={60}
-                className="h-16 w-auto"
+                width={300}
+                height={90}
+                className="h-24 w-auto"
               />
             </Link>
             <p className="text-slate-400 text-sm">
