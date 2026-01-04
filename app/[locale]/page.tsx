@@ -47,7 +47,7 @@ function HomePageContent() {
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/70" />
 
           {/* Hero Content - Positioned over image, lower position */}
-          <div className="absolute inset-0 flex items-end justify-center pb-16 md:pb-24">
+          <div className="absolute inset-0 flex items-end justify-center pb-12 md:pb-20">
             <div className="text-center px-4 max-w-5xl mx-auto">
               {/* Main Heading */}
               <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
