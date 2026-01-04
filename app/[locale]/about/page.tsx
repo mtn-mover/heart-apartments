@@ -22,7 +22,6 @@ export default async function AboutPage({
 
 function AboutPageContent() {
   const t = useTranslations('about');
-  const nav = useTranslations('nav');
 
   const values = [
     { key: 'value1', icon: '💎' },
@@ -49,19 +48,6 @@ function AboutPageContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Breadcrumb */}
-      <div className="bg-opal-pearl py-4 border-b border-opal-blue/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center space-x-2 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-opal-blue transition-colors">
-              {nav('home')}
-            </Link>
-            <span className="text-slate-400">/</span>
-            <span className="text-slate-900 font-medium">{nav('about')}</span>
-          </nav>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 bg-slate-900 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">

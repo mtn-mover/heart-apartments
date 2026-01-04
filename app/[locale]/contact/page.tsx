@@ -22,23 +22,9 @@ export default async function ContactPage({
 
 function ContactPageContent() {
   const t = useTranslations('contact');
-  const nav = useTranslations('nav');
 
   return (
     <div className="min-h-screen">
-      {/* Breadcrumb */}
-      <div className="bg-opal-pearl py-4 border-b border-opal-blue/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center space-x-2 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-opal-blue transition-colors">
-              {nav('home')}
-            </Link>
-            <span className="text-slate-400">/</span>
-            <span className="text-slate-900 font-medium">{nav('contact')}</span>
-          </nav>
-        </div>
-      </div>
-
       {/* Header */}
       <section className="py-16 md:py-24 bg-opal-pearl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
