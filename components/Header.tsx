@@ -29,9 +29,9 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-20 md:h-24">
           {/* Logo */}
-          <Logo variant="horizontal" className="h-10 md:h-12 w-auto" />
+          <Logo variant="horizontal" className="h-14 md:h-16 w-auto" />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">

@@ -36,7 +36,7 @@ function HomePageContent() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/Hero1.jpg"
+            src="/images/Hero1_1.jpg"
             alt="Jungfrau Mountains at Sunset - Interlaken"
             fill
             priority
@@ -48,18 +48,6 @@ function HomePageContent() {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          {/* Logo */}
-          <div className="mb-8">
-            <Image
-              src="/images/favicon.png"
-              alt="Opal Heart"
-              width={80}
-              height={80}
-              className="mx-auto mb-4"
-              priority
-            />
-          </div>
-
           {/* Main Heading */}
           <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
             {t('heroTitle')}

@@ -31,10 +31,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'Opal Heart Guesthouse' }],
   icons: {
     icon: [
-      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', sizes: '192x192', type: 'image/png' },
     ],
     apple: [
-      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
   openGraph: {
@@ -64,7 +65,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <div className="min-h-screen flex flex-col">
             <Header />
-            <main className="flex-grow pt-16 md:pt-20">
+            <main className="flex-grow pt-20 md:pt-24">
               {children}
             </main>
             <Footer />
