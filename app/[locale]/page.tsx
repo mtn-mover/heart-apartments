@@ -32,49 +32,45 @@ function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
+      <section className="relative flex items-center justify-center bg-slate-900">
+        {/* Background Image - Full height visible */}
+        <div className="relative w-full">
           <Image
             src="/images/Hero1_1.jpg"
             alt="Jungfrau Mountains at Sunset - Interlaken"
-            fill
+            width={1920}
+            height={1080}
             priority
             quality={90}
-            className="object-cover"
+            className="w-full h-auto"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/70" />
-        </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          {/* Main Heading */}
-          <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-            {t('heroTitle')}
-          </h1>
+          {/* Hero Content - Positioned over image */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center px-4 max-w-5xl mx-auto">
+              {/* Main Heading */}
+              <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
+                {t('heroTitle')}
+              </h1>
 
-          {/* Tagline */}
-          <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 font-light max-w-3xl mx-auto">
-            {t('heroSubtitle')}
-          </p>
+              {/* Tagline */}
+              <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 font-light max-w-3xl mx-auto">
+                {t('heroSubtitle')}
+              </p>
 
-          {/* CTA Button */}
-          <Link
-            href="/apartments"
-            className="inline-flex items-center px-10 py-4 bg-opal-blue hover:bg-opal-teal text-white font-medium text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-          >
-            {t('heroCta')}
-            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <svg className="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
+              {/* CTA Button */}
+              <Link
+                href="/apartments"
+                className="inline-flex items-center px-10 py-4 bg-opal-blue hover:bg-opal-teal text-white font-medium text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+              >
+                {t('heroCta')}
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

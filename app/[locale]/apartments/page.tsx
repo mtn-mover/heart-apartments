@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { apartments } from '@/data/apartments';
 import ApartmentCard from '@/components/ApartmentCard';
 import { Link } from '@/i18n/navigation';
@@ -27,26 +28,35 @@ function ApartmentsPageContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Breadcrumb */}
-      <div className="bg-opal-pearl py-4 border-b border-opal-blue/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center space-x-2 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-opal-blue transition-colors">
+      {/* Hero Section with Apartment Image */}
+      <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/heart1/heards_1_1_dining_area.jpg"
+            alt="Modern apartment interior"
+            fill
+            priority
+            quality={90}
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/60" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          {/* Breadcrumb */}
+          <nav className="flex items-center justify-center space-x-2 text-sm mb-6">
+            <Link href="/" className="text-white/70 hover:text-white transition-colors">
               {nav('home')}
             </Link>
-            <span className="text-slate-400">/</span>
-            <span className="text-slate-900 font-medium">{nav('apartments')}</span>
+            <span className="text-white/50">/</span>
+            <span className="text-white font-medium">{nav('apartments')}</span>
           </nav>
-        </div>
-      </div>
 
-      {/* Header */}
-      <section className="py-12 md:py-16 bg-opal-pearl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 font-heading">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 font-heading">
             {t('featuredTitle')}
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
             {t('featuredSubtitle')}
           </p>
         </div>
