@@ -16,8 +16,8 @@ export default function Logo({
   href = '/',
   inverted = false
 }: LogoProps) {
-  // Use the actual logo image
-  const logoSrc = '/logo/little-heart-logo.jpg';
+  // Use the actual logo image (PNG with transparent background)
+  const logoSrc = '/logo/little-heart-logo.png';
 
   const content = (
     <div className={`flex items-center ${variant === 'stacked' ? 'flex-col' : 'flex-row'} ${className}`}>
