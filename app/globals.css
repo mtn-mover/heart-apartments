@@ -1,67 +1,150 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1E293B;
+  --background: #FAF9F6;
+  --foreground: #2C3E50;
 
-  /* Opal Color Palette */
-  --opal-blue: #4A90A4;
-  --opal-teal: #5FA8A8;
-  --opal-pearl: #E8F4F8;
-  --opal-mint: #A8D5BA;
+  /* Little Heart Brand Colors */
 
-  /* Alpine Colors */
-  --alpine-gold: #D4AF37;
-  --alpine-red: #C85A54;
-  --alpine-white: #FEFEFE;
-  --alpine-snow: #F8FAFB;
+  /* Heart Coral - Primary CTA/Accent Color */
+  --heart-coral-50: #fef2f2;
+  --heart-coral-100: #fee2e2;
+  --heart-coral-200: #fecaca;
+  --heart-coral-300: #fca5a5;
+  --heart-coral-400: #f87171;
+  --heart-coral-500: #E57373;
+  --heart-coral-600: #dc2626;
+  --heart-coral-700: #b91c1c;
+  --heart-coral-800: #991b1b;
+  --heart-coral-900: #7f1d1d;
 
-  /* Slate Colors */
-  --slate-900: #1E293B;
-  --slate-700: #334155;
-  --slate-500: #64748B;
-  --slate-300: #CBD5E1;
-  --slate-100: #F1F5F9;
+  /* Heart Sage - Secondary/Nature Color */
+  --heart-sage-50: #f6f7f6;
+  --heart-sage-100: #e3e8e3;
+  --heart-sage-200: #c7d1c7;
+  --heart-sage-300: #a4b4a4;
+  --heart-sage-400: #8B9D83;
+  --heart-sage-500: #6b8463;
+  --heart-sage-600: #546a4f;
+  --heart-sage-700: #455542;
+  --heart-sage-800: #394637;
+  --heart-sage-900: #2f3a2f;
+
+  /* Heart Gold - Accent/Highlight Color */
+  --heart-gold-50: #faf8f3;
+  --heart-gold-100: #f5f0e6;
+  --heart-gold-200: #ead9c0;
+  --heart-gold-300: #dfc199;
+  --heart-gold-400: #D4A574;
+  --heart-gold-500: #c08a4f;
+  --heart-gold-600: #a06f3f;
+  --heart-gold-700: #855835;
+  --heart-gold-800: #6d4830;
+  --heart-gold-900: #5a3d29;
+
+  /* Heart Charcoal - Text/Dark Color */
+  --heart-charcoal-50: #f8fafc;
+  --heart-charcoal-100: #f1f5f9;
+  --heart-charcoal-200: #e2e8f0;
+  --heart-charcoal-300: #cbd5e1;
+  --heart-charcoal-400: #94a3b8;
+  --heart-charcoal-500: #64748b;
+  --heart-charcoal-600: #475569;
+  --heart-charcoal-700: #334155;
+  --heart-charcoal-800: #2C3E50;
+  --heart-charcoal-900: #0f172a;
+
+  /* Heart Cream - Background/Light Color */
+  --heart-cream-50: #FAF9F6;
+  --heart-cream-100: #f7f6f3;
+  --heart-cream-200: #efede8;
+  --heart-cream-300: #e4e1da;
+  --heart-cream-400: #d5d0c6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Opal Colors */
-  --color-opal-blue: var(--opal-blue);
-  --color-opal-teal: var(--opal-teal);
-  --color-opal-pearl: var(--opal-pearl);
-  --color-opal-mint: var(--opal-mint);
+  /* Heart Coral Colors */
+  --color-heart-coral-50: var(--heart-coral-50);
+  --color-heart-coral-100: var(--heart-coral-100);
+  --color-heart-coral-200: var(--heart-coral-200);
+  --color-heart-coral-300: var(--heart-coral-300);
+  --color-heart-coral-400: var(--heart-coral-400);
+  --color-heart-coral-500: var(--heart-coral-500);
+  --color-heart-coral-600: var(--heart-coral-600);
+  --color-heart-coral-700: var(--heart-coral-700);
+  --color-heart-coral-800: var(--heart-coral-800);
+  --color-heart-coral-900: var(--heart-coral-900);
 
-  /* Alpine Colors */
-  --color-alpine-gold: var(--alpine-gold);
-  --color-alpine-red: var(--alpine-red);
-  --color-alpine-white: var(--alpine-white);
-  --color-alpine-snow: var(--alpine-snow);
+  /* Heart Sage Colors */
+  --color-heart-sage-50: var(--heart-sage-50);
+  --color-heart-sage-100: var(--heart-sage-100);
+  --color-heart-sage-200: var(--heart-sage-200);
+  --color-heart-sage-300: var(--heart-sage-300);
+  --color-heart-sage-400: var(--heart-sage-400);
+  --color-heart-sage-500: var(--heart-sage-500);
+  --color-heart-sage-600: var(--heart-sage-600);
+  --color-heart-sage-700: var(--heart-sage-700);
+  --color-heart-sage-800: var(--heart-sage-800);
+  --color-heart-sage-900: var(--heart-sage-900);
 
-  /* Slate Colors */
-  --color-slate-900: var(--slate-900);
-  --color-slate-700: var(--slate-700);
-  --color-slate-500: var(--slate-500);
-  --color-slate-300: var(--slate-300);
-  --color-slate-100: var(--slate-100);
+  /* Heart Gold Colors */
+  --color-heart-gold-50: var(--heart-gold-50);
+  --color-heart-gold-100: var(--heart-gold-100);
+  --color-heart-gold-200: var(--heart-gold-200);
+  --color-heart-gold-300: var(--heart-gold-300);
+  --color-heart-gold-400: var(--heart-gold-400);
+  --color-heart-gold-500: var(--heart-gold-500);
+  --color-heart-gold-600: var(--heart-gold-600);
+  --color-heart-gold-700: var(--heart-gold-700);
+  --color-heart-gold-800: var(--heart-gold-800);
+  --color-heart-gold-900: var(--heart-gold-900);
 
-  /* Legacy Rose Colors (for backwards compatibility during transition) */
-  --color-rose-50: #fff1f2;
-  --color-rose-100: #ffe4e6;
-  --color-rose-200: #fecdd3;
-  --color-rose-300: #fda4af;
-  --color-rose-400: #fb7185;
-  --color-rose-500: #f43f5e;
-  --color-rose-600: #4A90A4;
-  --color-rose-700: #3d7a8c;
-  --color-rose-800: #9f1239;
-  --color-rose-900: #881337;
+  /* Heart Charcoal Colors */
+  --color-heart-charcoal-50: var(--heart-charcoal-50);
+  --color-heart-charcoal-100: var(--heart-charcoal-100);
+  --color-heart-charcoal-200: var(--heart-charcoal-200);
+  --color-heart-charcoal-300: var(--heart-charcoal-300);
+  --color-heart-charcoal-400: var(--heart-charcoal-400);
+  --color-heart-charcoal-500: var(--heart-charcoal-500);
+  --color-heart-charcoal-600: var(--heart-charcoal-600);
+  --color-heart-charcoal-700: var(--heart-charcoal-700);
+  --color-heart-charcoal-800: var(--heart-charcoal-800);
+  --color-heart-charcoal-900: var(--heart-charcoal-900);
+
+  /* Heart Cream Colors */
+  --color-heart-cream-50: var(--heart-cream-50);
+  --color-heart-cream-100: var(--heart-cream-100);
+  --color-heart-cream-200: var(--heart-cream-200);
+  --color-heart-cream-300: var(--heart-cream-300);
+  --color-heart-cream-400: var(--heart-cream-400);
+
+  /* Legacy color aliases for backwards compatibility during transition */
+  --color-opal-blue: var(--heart-sage-400);
+  --color-opal-teal: var(--heart-coral-500);
+  --color-opal-pearl: var(--heart-cream-50);
+  --color-opal-mint: var(--heart-sage-200);
+  --color-alpine-gold: var(--heart-gold-400);
+  --color-alpine-red: var(--heart-coral-500);
+  --color-alpine-white: var(--heart-cream-50);
+  --color-alpine-snow: var(--heart-cream-100);
+  --color-slate-900: var(--heart-charcoal-900);
+  --color-slate-800: var(--heart-charcoal-800);
+  --color-slate-700: var(--heart-charcoal-700);
+  --color-slate-600: var(--heart-charcoal-600);
+  --color-slate-500: var(--heart-charcoal-500);
+  --color-slate-400: var(--heart-charcoal-400);
+  --color-slate-300: var(--heart-charcoal-300);
+  --color-slate-200: var(--heart-charcoal-200);
+  --color-slate-100: var(--heart-charcoal-100);
+  --color-slate-50: var(--heart-charcoal-50);
 
   /* Font Families - uses Next.js font variables */
   --font-heading: var(--font-playfair), Georgia, serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-script: var(--font-sacramento), cursive;
 }
 
 body {
@@ -77,6 +160,10 @@ body {
 
 .font-body {
   font-family: var(--font-body);
+}
+
+.font-script {
+  font-family: var(--font-script);
 }
 
 h1, h2, h3, h4, h5, h6 {

@@ -32,7 +32,7 @@ function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center bg-slate-900">
+      <section className="relative flex items-center justify-center bg-heart-charcoal-900">
         {/* Background Image - Full height visible */}
         <div className="relative w-full">
           <Image
@@ -44,10 +44,9 @@ function HomePageContent() {
             quality={90}
             className="w-full h-auto"
           />
-          {/* No overlay - show original image brightness */}
 
           {/* Gradient Overlay - Full width at bottom */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-900/70 via-slate-900/50 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-heart-charcoal-900/70 via-heart-charcoal-900/50 to-transparent pointer-events-none" />
 
           {/* Hero Content - Positioned over image, lower position */}
           <div className="absolute inset-0 flex items-end">
@@ -66,7 +65,7 @@ function HomePageContent() {
                 {/* CTA Button */}
                 <Link
                   href="/apartments"
-                  className="inline-flex items-center px-10 py-4 bg-opal-blue hover:bg-opal-teal text-white font-medium text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                  className="inline-flex items-center px-10 py-4 bg-heart-coral-500 hover:bg-heart-coral-600 text-white font-medium text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
                 >
                   {t('heroCta')}
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,13 +86,13 @@ function HomePageContent() {
       </section>
 
       {/* Featured Apartments Section */}
-      <section className="py-16 md:py-24 bg-slate-50">
+      <section className="py-16 md:py-24 bg-heart-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 font-heading">
+            <h2 className="text-3xl md:text-4xl font-bold text-heart-charcoal-800 mb-4 font-heading">
               {t('featuredTitle')}
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg text-heart-charcoal-600 max-w-2xl mx-auto">
               {t('featuredSubtitle')}
             </p>
           </div>
@@ -114,10 +113,10 @@ function HomePageContent() {
       <DianaSection />
 
       {/* About Snippet Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
               <Image
                 src="/images/heart5/heards5_1_living_room.jpg"
                 alt="Swiss Chalet Interior"
@@ -126,15 +125,15 @@ function HomePageContent() {
               />
             </div>
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 font-heading">
+              <h2 className="text-3xl md:text-4xl font-bold text-heart-charcoal-800 mb-6 font-heading">
                 {t('aboutSnippetTitle')}
               </h2>
-              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+              <p className="text-lg text-heart-charcoal-600 mb-8 leading-relaxed">
                 {t('aboutSnippetText')}
               </p>
               <Link
                 href="/about"
-                className="inline-flex items-center text-opal-blue font-semibold hover:text-opal-teal transition-colors"
+                className="inline-flex items-center text-heart-coral-500 font-semibold hover:text-heart-coral-600 transition-colors"
               >
                 {t('learnMore')}
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,17 +146,20 @@ function HomePageContent() {
       </section>
 
       {/* Why Us / Features Section */}
-      <section className="py-16 md:py-24 bg-slate-900 text-white">
+      <section className="py-16 md:py-24 bg-heart-charcoal-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 font-heading">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 font-heading">
             {t('whyUsTitle')}
           </h2>
+          <p className="text-xl text-center text-heart-charcoal-300 mb-12">
+            {t('whyUsSubtitle')}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="text-center p-6 rounded-xl bg-heart-charcoal-700/50 hover:bg-heart-charcoal-700 transition-colors">
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{t(feature.titleKey as keyof typeof t)}</h3>
-                <p className="text-slate-400">{t(feature.textKey as keyof typeof t)}</p>
+                <h3 className="text-xl font-semibold mb-2 text-white">{t(feature.titleKey as keyof typeof t)}</h3>
+                <p className="text-heart-charcoal-300">{t(feature.textKey as keyof typeof t)}</p>
               </div>
             ))}
           </div>

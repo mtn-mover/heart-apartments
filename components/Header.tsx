@@ -27,7 +27,7 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-heart-sage-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo */}
@@ -40,8 +40,8 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-opal-blue',
-                  isActive(item.href) ? 'text-opal-blue' : 'text-slate-700'
+                  'text-sm font-medium transition-colors hover:text-heart-coral-500',
+                  isActive(item.href) ? 'text-heart-coral-500' : 'text-heart-charcoal-700'
                 )}
               >
                 {item.label}
@@ -56,7 +56,7 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="md:hidden p-2 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              className="md:hidden p-2 rounded-md text-heart-charcoal-700 hover:text-heart-charcoal-900 hover:bg-heart-sage-50"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -75,7 +75,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-slate-100">
+          <nav className="md:hidden py-4 border-t border-heart-sage-100">
             <div className="flex flex-col space-y-3">
               {navItems.map((item) => (
                 <Link
@@ -85,8 +85,8 @@ export default function Header() {
                   className={cn(
                     'px-3 py-2 rounded-md text-base font-medium transition-colors',
                     isActive(item.href)
-                      ? 'text-opal-blue bg-opal-pearl'
-                      : 'text-slate-700 hover:text-opal-blue hover:bg-slate-50'
+                      ? 'text-heart-coral-500 bg-heart-coral-50'
+                      : 'text-heart-charcoal-700 hover:text-heart-coral-500 hover:bg-heart-sage-50'
                   )}
                 >
                   {item.label}
