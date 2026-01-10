@@ -36,8 +36,8 @@ function HomePageContent() {
         {/* Background Image - Full height visible */}
         <div className="relative w-full">
           <Image
-            src="/images/Hero1_2.jpg"
-            alt="Jungfrau Mountains at Sunset - Interlaken"
+            src="/hero_little_heard.png"
+            alt="Little Heart Guesthouse - Interlaken"
             width={1920}
             height={1080}
             priority
