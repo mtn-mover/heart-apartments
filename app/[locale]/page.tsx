@@ -2,9 +2,6 @@ import { useTranslations } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import { apartments } from '@/data/apartments';
-import ApartmentCard from '@/components/ApartmentCard';
-import DianaSection from '@/components/DianaSection';
 import ReviewsSection from '@/components/ReviewsSection';
 
 export default async function HomePage({
@@ -85,34 +82,34 @@ function HomePageContent() {
         </div>
       </section>
 
-      {/* Featured Apartments Section */}
+      {/* Guesthouse Philosophy Section */}
       <section className="py-16 md:py-24 bg-heart-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-heart-charcoal-800 mb-4 font-heading">
-              {t('featuredTitle')}
+              {t('aboutSnippetTitle')}
             </h2>
-            <p className="text-lg text-heart-charcoal-600 max-w-2xl mx-auto">
-              {t('featuredSubtitle')}
+            <p className="text-xl text-heart-charcoal-600 max-w-3xl mx-auto leading-relaxed">
+              {t('aboutSnippetText')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {apartments.map((apartment, index) => (
-              <ApartmentCard
-                key={apartment.id}
-                apartment={apartment}
-                priority={index < 3}
-              />
-            ))}
+          {/* CTA to Apartments */}
+          <div className="text-center mt-8">
+            <Link
+              href="/apartments"
+              className="inline-flex items-center px-8 py-4 bg-heart-coral-500 hover:bg-heart-coral-600 text-white font-semibold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              {t('heroCta')}
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Diana Section */}
-      <DianaSection />
-
-      {/* About Snippet Section */}
+      {/* Interlaken Location Section */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -126,10 +123,10 @@ function HomePageContent() {
             </div>
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-heart-charcoal-800 mb-6 font-heading">
-                {t('aboutSnippetTitle')}
+                {t('whyInterlakenTitle')}
               </h2>
               <p className="text-lg text-heart-charcoal-600 mb-8 leading-relaxed">
-                {t('aboutSnippetText')}
+                {t('whyInterlakenText')}
               </p>
               <Link
                 href="/about"
