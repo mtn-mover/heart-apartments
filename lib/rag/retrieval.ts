@@ -78,18 +78,37 @@ const DIANA_KEYWORDS = [
   'änderung', 'change', 'modify',
 ];
 
+// Greetings and small talk - don't suggest Diana for these
+const GREETING_PATTERNS = [
+  'hallo', 'hello', 'hi', 'hey', 'guten tag', 'guten morgen', 'guten abend',
+  'bonjour', 'salut', 'bonsoir',
+  'danke', 'thank', 'merci',
+  'tschüss', 'bye', 'auf wiedersehen', 'au revoir',
+  'wie geht', 'how are', 'comment allez',
+];
+
+function isGreetingOrSmallTalk(message: string): boolean {
+  const lower = message.toLowerCase().trim();
+  // Short messages that are likely greetings
+  if (lower.length < 30) {
+    return GREETING_PATTERNS.some((pattern) => lower.includes(pattern));
+  }
+  return false;
+}
+
 export function shouldSuggestDiana(
   confidence: number,
   userMessage: string,
   assistantResponse: string
 ): boolean {
-  // Low confidence threshold
-  if (confidence < 0.5) {
-    return true;
+  const lowerMessage = userMessage.toLowerCase();
+
+  // Never suggest Diana for greetings or small talk
+  if (isGreetingOrSmallTalk(userMessage)) {
+    return false;
   }
 
-  // Check for Diana-specific keywords
-  const lowerMessage = userMessage.toLowerCase();
+  // Check for Diana-specific keywords FIRST (these always need Diana)
   if (DIANA_KEYWORDS.some((kw) => lowerMessage.includes(kw))) {
     return true;
   }
@@ -105,6 +124,12 @@ export function shouldSuggestDiana(
 
   const lowerResponse = assistantResponse.toLowerCase();
   if (uncertainPhrases.some((phrase) => lowerResponse.includes(phrase))) {
+    return true;
+  }
+
+  // Only suggest Diana for very low confidence on actual questions
+  // (confidence 0 means no documents matched, which is fine for general chat)
+  if (confidence > 0 && confidence < 0.4) {
     return true;
   }
 

@@ -108,7 +108,8 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
           guestName: data.name,
           guestContact: data.contact,
           question: data.question,
-          conversationSummary: messages.slice(-6).map((m) => `${m.role}: ${m.content}`).join('\n'),
+          // Only include a brief note, not the full conversation
+          conversationSummary: undefined,
           language: locale,
         }),
       });
