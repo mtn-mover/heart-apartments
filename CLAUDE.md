@@ -73,10 +73,61 @@
    - About: Fokus auf Host Diana
    - Apartments: Alle 5 Wohnungen
 
+## RAG-Chatbot "Diana's Assistent"
+
+### Architektur
+- **LLM:** Claude Sonnet (Anthropic)
+- **Embeddings:** OpenAI text-embedding-3-small
+- **Vector-DB:** Supabase pgvector
+- **WhatsApp:** Twilio API (Fallback zu Diana)
+
+### Wichtige Dateien
+- `/lib/rag/prompts.ts` - System-Prompt mit kritischen Infos
+- `/lib/rag/retrieval.ts` - RAG-Suche und Diana-Trigger
+- `/app/api/chat/route.ts` - Chat-API
+- `/app/api/whatsapp/route.ts` - WhatsApp-API
+- `/components/chat/` - Chat-UI Komponenten
+- `/scripts/ingest-documents.ts` - Dokumente in Supabase laden
+- `/scripts/test-chat.ts` - Chatbot-Tests
+
+### Dokumente aktualisieren
+```sh
+# Word-Docs in Bot_Info/ ändern, dann:
+npx tsx scripts/ingest-documents.ts
+```
+
+---
+
+## Lessons Learned
+
+### RAG + System-Prompt Hybrid
+- **RAG allein reicht nicht für kritische Infos** - WiFi-Passwörter und apartment-spezifische Unterschiede wurden nicht zuverlässig gefunden
+- **Hybrid-Ansatz:** System-Prompt für kritische Fakten (WiFi, Waschmaschine), RAG für Details (Aktivitäten, Tipps)
+- **Similarity Threshold:** 0.7 war zu hoch, 0.3 funktioniert besser für semantische Suche
+
+### Apartment-spezifische Infos
+- HEART1-4 vs HEART5 haben unterschiedliche WiFi-Passwörter
+- HEART5 hat KEINE Waschmaschine (HEART1-4 schon)
+- Bot muss IMMER zuerst nach Wohnung fragen bei solchen Themen
+
+### Testing
+- Ohne Test-Script hätten wir falsche Antworten nicht gefunden
+- `npx tsx scripts/test-chat.ts` vor jedem Deploy ausführen
+
+### Vercel
+- Preview-Deployments sind durch Vercel Auth geschützt
+- Lokales Testen mit `npm run dev` oder Test-Script
+
+---
+
 ## Commands
 ```sh
 npm run dev      # Development Server starten
 npm run build    # Production Build
 npm run lint     # Linting
 git push         # Deploy via Vercel
+
+# Chatbot
+npx tsx scripts/ingest-documents.ts  # Dokumente neu laden
+npx tsx scripts/test-chat.ts         # Chatbot testen
 ```
