@@ -5,6 +5,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { ChatButton } from '@/components/chat';
 import '../globals.css';
 
 const inter = Inter({
@@ -74,6 +75,8 @@ export default async function LocaleLayout({
               {children}
             </main>
             <Footer />
+            {/* Chat Widget */}
+            <ChatButton />
           </div>
         </NextIntlClientProvider>
       </body>
