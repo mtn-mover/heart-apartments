@@ -27,7 +27,7 @@ export async function createEmbedding(text: string): Promise<number[]> {
 
 export async function searchDocuments(
   queryEmbedding: number[],
-  matchThreshold = 0.7,
+  matchThreshold = 0.3,
   matchCount = 5
 ): Promise<SearchResult[]> {
   const { data, error } = await supabase.rpc('search_documents', {
@@ -127,11 +127,9 @@ export function shouldSuggestDiana(
     return true;
   }
 
-  // Only suggest Diana for very low confidence on actual questions
-  // (confidence 0 means no documents matched, which is fine for general chat)
-  if (confidence > 0 && confidence < 0.4) {
-    return true;
-  }
+  // If we found relevant documents (confidence > 0.3), the bot can answer
+  // Only suggest Diana if confidence is very low (indicates poor match)
+  // Threshold lowered because good semantic matches can still be 0.3-0.5
 
   return false;
 }

@@ -21,8 +21,18 @@ function getAnthropic(): Anthropic {
 
 // Detect language from message content
 function detectLanguage(text: string): string {
-  const germanIndicators = ['ich', 'und', 'der', 'die', 'das', 'ist', 'ein', 'eine', 'für', 'mit', 'wie', 'kann', 'bitte'];
-  const frenchIndicators = ['je', 'et', 'le', 'la', 'les', 'est', 'un', 'une', 'pour', 'avec', 'comment', 'pouvez', 'merci'];
+  const germanIndicators = [
+    'ich', 'und', 'der', 'die', 'das', 'ist', 'ein', 'eine', 'für', 'mit',
+    'wie', 'kann', 'bitte', 'meine', 'mein', 'hallo', 'guten', 'danke',
+    'wo', 'wann', 'was', 'wer', 'warum', 'möchte', 'brauche', 'habe',
+    'gibt', 'es', 'mir', 'sie', 'ihr', 'uns', 'nicht', 'auch', 'noch',
+    'schon', 'hier', 'dort', 'heute', 'morgen', 'abend', 'nacht',
+  ];
+  const frenchIndicators = [
+    'je', 'et', 'le', 'la', 'les', 'est', 'un', 'une', 'pour', 'avec',
+    'comment', 'pouvez', 'merci', 'bonjour', 'bonsoir', 'où', 'quand',
+    'qui', 'quoi', 'pourquoi', 'mon', 'ma', 'mes', 'votre', 'nous',
+  ];
 
   const lowerText = text.toLowerCase();
   const words = lowerText.split(/\s+/);
@@ -30,10 +40,11 @@ function detectLanguage(text: string): string {
   const germanMatches = words.filter((w) => germanIndicators.includes(w)).length;
   const frenchMatches = words.filter((w) => frenchIndicators.includes(w)).length;
 
-  if (germanMatches > frenchMatches && germanMatches >= 2) {
+  // Lower threshold to 1 for better detection of short messages
+  if (germanMatches > frenchMatches && germanMatches >= 1) {
     return 'de';
   }
-  if (frenchMatches > germanMatches && frenchMatches >= 2) {
+  if (frenchMatches > germanMatches && frenchMatches >= 1) {
     return 'fr';
   }
   return 'en';
