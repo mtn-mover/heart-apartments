@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@/lib/supabase';
 import { retrieveContext, shouldSuggestDiana } from '@/lib/rag/retrieval';
 import { buildSystemPrompt } from '@/lib/rag/prompts';
-import { needsWebSearch, searchWeb, buildWebSearchContext } from '@/lib/rag/web-search';
+import { needsWebSearch, searchWeb, buildWebSearchContext, isWeatherQuery } from '@/lib/rag/web-search';
 import type { ChatRequest, ChatResponse } from '@/lib/rag/types';
 
 // Lazy initialization to prevent build-time errors
@@ -144,11 +144,12 @@ export async function POST(request: Request) {
 
     // Check if we need real-time web search
     let webSearchContext = '';
+    const isWeather = isWeatherQuery(message);
     if (needsWebSearch(message)) {
       try {
         const searchResult = await searchWeb(message, detectedLanguage);
         if (searchResult) {
-          webSearchContext = buildWebSearchContext(searchResult, detectedLanguage);
+          webSearchContext = buildWebSearchContext(searchResult, detectedLanguage, isWeather);
         }
       } catch (error) {
         console.error('Web search failed:', error);

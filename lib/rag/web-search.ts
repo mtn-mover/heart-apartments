@@ -85,6 +85,13 @@ export function needsWebSearch(message: string): boolean {
   return generalRealtimeQuestions.some((q) => lowerMessage.includes(q));
 }
 
+// Check if query is about weather (exported for use in route)
+export function isWeatherQuery(message: string): boolean {
+  const weatherTerms = ['wetter', 'weather', 'météo', 'temperatur', 'temperature', 'regen', 'rain', 'schnee', 'snow', 'sonnig', 'sunny'];
+  const lowerMessage = message.toLowerCase();
+  return weatherTerms.some((term) => lowerMessage.includes(term));
+}
+
 /**
  * Perform a web search using Tavily API
  */
@@ -92,10 +99,17 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
   try {
     const client = getTavilyClient();
 
-    // Add location context AND availability keywords to the query
-    // This ensures we get current opening status, not just general info
     const currentYear = new Date().getFullYear();
-    const enhancedQuery = `${query} Interlaken Schweiz öffnungszeiten aktuell geöffnet ${currentYear}`;
+    let enhancedQuery: string;
+
+    if (isWeatherQuery(query)) {
+      // Weather-specific search
+      const today = new Date().toLocaleDateString('de-CH');
+      enhancedQuery = `Wetter Interlaken Schweiz Wettervorhersage ${today} aktuell`;
+    } else {
+      // Attractions/activities - search for opening hours
+      enhancedQuery = `${query} Interlaken Schweiz öffnungszeiten aktuell geöffnet ${currentYear}`;
+    }
 
     const response = await client.search(enhancedQuery, {
       searchDepth: 'basic',
@@ -128,9 +142,27 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
 /**
  * Build a context string from web search results
  */
-export function buildWebSearchContext(searchResult: WebSearchResult, language: string): string {
+export function buildWebSearchContext(searchResult: WebSearchResult, language: string, isWeather: boolean = false): string {
   const now = new Date();
-  const dateStr = now.toLocaleDateString('de-CH', { month: 'long', year: 'numeric' });
+  const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  if (isWeather) {
+    return `
+## AKTUELLE WETTERDATEN - NUTZE DIESE INFORMATIONEN!
+
+Wetterdaten abgerufen am ${dateStr}:
+
+**Wetter-Informationen:**
+${searchResult.results}
+
+**Quelle:** ${searchResult.sources[0] || 'Web-Suche'}
+
+## DEINE ANTWORT MUSS:
+1. Die konkreten Wetterdaten aus der Suche nennen (Temperatur, Bedingungen)
+2. Für Aktivitäten: Einschätzen ob das Wetter geeignet ist
+3. NICHT sagen "ich kann das Wetter nicht abrufen" - du HAST die Daten!
+`;
+  }
 
   return `
 ## CRITICAL: REAL-TIME WEB SEARCH RESULTS - YOU MUST USE THIS!
