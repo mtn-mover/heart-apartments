@@ -1,15 +1,107 @@
 import type { DocumentChunk } from './types';
 
+// Apartment-specific information
+const APARTMENT_INFO = {
+  'HEART1': {
+    name: 'HEART1',
+    group: 'HEART1-4',
+    wifi: { network: 'Diana', password: 'Air38Dia04BnB' },
+    hasWashingMachine: true,
+    washingMachineInfo: 'Waschmaschine im Erdgeschoss (geteilt)',
+    hasBrochureRack: true,
+    location: '200m vom Bahnhof West',
+  },
+  'HEART2': {
+    name: 'HEART2',
+    group: 'HEART1-4',
+    wifi: { network: 'Diana', password: 'Air38Dia04BnB' },
+    hasWashingMachine: true,
+    washingMachineInfo: 'Waschmaschine im Erdgeschoss (geteilt)',
+    hasBrochureRack: true,
+    location: '200m vom Bahnhof West',
+  },
+  'HEART3': {
+    name: 'HEART3',
+    group: 'HEART1-4',
+    wifi: { network: 'Diana', password: 'Air38Dia04BnB' },
+    hasWashingMachine: true,
+    washingMachineInfo: 'Waschmaschine im Erdgeschoss (geteilt)',
+    hasBrochureRack: true,
+    location: '200m vom Bahnhof West',
+  },
+  'HEART4': {
+    name: 'HEART4',
+    group: 'HEART1-4',
+    wifi: { network: 'Diana', password: 'Air38Dia04BnB' },
+    hasWashingMachine: true,
+    washingMachineInfo: 'Waschmaschine im Erdgeschoss (geteilt)',
+    hasBrochureRack: true,
+    location: '200m vom Bahnhof West',
+  },
+  'HEART5': {
+    name: 'HEART5',
+    group: 'HEART5',
+    wifi: { network: 'Diana', password: 'Air38Dia18BnB' },
+    hasWashingMachine: false,
+    washingMachineInfo: 'Keine Waschmaschine → "wash & go" Postgasse 18',
+    hasBrochureRack: false,
+    location: 'Anderer Standort als HEART1-4',
+  },
+};
+
+type ApartmentKey = keyof typeof APARTMENT_INFO;
+
+function buildApartmentSection(apartment: string | null): string {
+  if (!apartment || !(apartment in APARTMENT_INFO)) {
+    // Apartment NOT known → tell Claude to ask first
+    return `
+═══════════════════════════════════════════════════════════════
+## 🏠 APARTMENT NOCH NICHT BEKANNT!
+═══════════════════════════════════════════════════════════════
+
+Der Gast hat noch nicht gesagt, in welchem Apartment er ist.
+
+**Bei Fragen zu WiFi, Waschmaschine, Lage, Ausstattung:**
+→ ZUERST fragen: "In welchem Apartment bist du? (HEART1, HEART2, HEART3, HEART4 oder HEART5)"
+→ KEINE Infos geben, bis der Gast antwortet!
+
+❌ FALSCH: "Das WLAN-Passwort ist ... für HEART1-4 oder ... für HEART5"
+✅ RICHTIG: "In welchem Apartment bist du? Dann gebe ich dir das richtige WLAN-Passwort."
+
+**Allgemeine Fragen (Check-in Zeit, Ausflugstipps) → normal beantworten.**`;
+  }
+
+  // Apartment IS known → give specific info
+  const apt = APARTMENT_INFO[apartment as ApartmentKey];
+
+  return `
+═══════════════════════════════════════════════════════════════
+## 🏠 GAST IST IN: ${apt.name}
+═══════════════════════════════════════════════════════════════
+
+**WLAN:** Netzwerk "${apt.wifi.network}", Passwort: ${apt.wifi.password}
+**Waschmaschine:** ${apt.hasWashingMachine ? apt.washingMachineInfo : apt.washingMachineInfo}
+**Broschüren-Regal:** ${apt.hasBrochureRack ? 'Ja, im Erdgeschoss' : 'Nicht vorhanden in HEART5'}
+**Lage:** ${apt.location}
+
+Gib NUR diese Infos für ${apt.name}. Erwähne NICHT die anderen Apartments.`;
+}
+
 export function buildSystemPrompt(
   language: string,
   context: DocumentChunk[],
-  confidence: number
+  confidence: number,
+  apartment: string | null = null
 ): string {
   const contextText =
     context.length > 0 ? context.map((c) => c.content).join('\n---\n') : '';
 
+  const apartmentSection = buildApartmentSection(apartment);
+
   return `Du bist "Diana's Assistent" für das Little Heart Guesthouse in Interlaken.
 Antworte IMMER in der Sprache des Gastes (aktuell: ${language}).
+
+${apartmentSection}
 
 ═══════════════════════════════════════════════════════════════
 ## 🛑 BEI FRAGEN ZU ATTRAKTIONEN/AUSFLÜGEN:
@@ -27,7 +119,6 @@ NIEMALS nur Links geben - die KONKRETE Info aus der Suche nennen!
 
 ### 3. KEINE WIEDERHOLUNGEN!
 - Erwähne das Broschüren-Regal NICHT bei Ausflugsfragen
-- Frage NICHT ständig nach dem Apartment
 - Halte Antworten KURZ
 
 ═══════════════════════════════════════════════════════════════
@@ -35,23 +126,12 @@ NIEMALS nur Links geben - die KONKRETE Info aus der Suche nennen!
 ═══════════════════════════════════════════════════════════════
 - KEINE Telefonnummern/WhatsApp-Nummern (Chat hat Button)
 - KEINE erfundenen Informationen
-- KEIN Wiederholen von "In welchem Apartment bist du?" bei Ausflugs-Fragen
 - KEIN Erwähnen vom Broschüren-Regal bei allgemeinen Ausflugsfragen
 
 ═══════════════════════════════════════════════════════════════
-## APARTMENT-UNTERSCHIEDE (KRITISCH!)
+## ALLGEMEINE INFOS (für alle Apartments gleich)
 ═══════════════════════════════════════════════════════════════
-
-HEART5 ist an einem ANDEREN ORT als HEART1-4!
-
-| Was | HEART1-4 | HEART5 |
-|-----|----------|--------|
-| Lage | 200m vom Bahnhof West | ANDERER Standort! |
-| WiFi | "Diana" / Air38Dia04BnB | "Diana" / Air38Dia18BnB |
-| Waschmaschine | JA (Erdgeschoss) | NEIN → "wash & go" Postgasse 18 |
-| Broschüren-Regal | JA (Erdgeschoss) | NEIN |
-
-**Check-in/out (alle gleich):** 16:00 / 10:00
+**Check-in:** 16:00 | **Check-out:** 10:00
 **Späte Ankunft:** Schlüsselbox vorhanden, Code bei Diana anfragen
 
 ═══════════════════════════════════════════════════════════════

@@ -20,6 +20,42 @@ function getAnthropic(): Anthropic {
   return anthropicInstance;
 }
 
+// Detect apartment from message content
+function detectApartment(text: string): string | null {
+  const lowerText = text.toLowerCase();
+
+  // Direct mentions of apartment numbers
+  if (lowerText.includes('heart 5') || lowerText.includes('heart5') || lowerText.includes('herz 5')) {
+    return 'HEART5';
+  }
+  if (lowerText.includes('heart 4') || lowerText.includes('heart4') || lowerText.includes('herz 4')) {
+    return 'HEART4';
+  }
+  if (lowerText.includes('heart 3') || lowerText.includes('heart3') || lowerText.includes('herz 3')) {
+    return 'HEART3';
+  }
+  if (lowerText.includes('heart 2') || lowerText.includes('heart2') || lowerText.includes('herz 2')) {
+    return 'HEART2';
+  }
+  if (lowerText.includes('heart 1') || lowerText.includes('heart1') || lowerText.includes('herz 1')) {
+    return 'HEART1';
+  }
+
+  // Shorthand references (just the number in context)
+  const numberMatch = lowerText.match(/\b(apartment|wohnung|zimmer|room)\s*(nummer|number|nr\.?)?\s*([1-5])\b/i);
+  if (numberMatch) {
+    return `HEART${numberMatch[3]}`;
+  }
+
+  // Just a number as a response to "which apartment?"
+  const justNumber = lowerText.match(/^\s*([1-5])\s*$/);
+  if (justNumber) {
+    return `HEART${justNumber[1]}`;
+  }
+
+  return null;
+}
+
 // Detect language from message content
 function detectLanguage(text: string): string {
   const germanIndicators = [
@@ -58,7 +94,10 @@ export async function POST(request: Request) {
 
     // Create or get session
     let currentSessionId = sessionId;
+    let knownApartment: string | null = null;
+
     if (!currentSessionId) {
+      // Create new session
       const { data: session, error: sessionError } = await supabase
         .from('chat_sessions')
         .insert({ locale })
@@ -69,6 +108,31 @@ export async function POST(request: Request) {
         console.error('Error creating session:', sessionError);
       } else {
         currentSessionId = session.id;
+      }
+    } else {
+      // Load existing session to get apartment
+      const { data: session } = await supabase
+        .from('chat_sessions')
+        .select('apartment')
+        .eq('id', currentSessionId)
+        .single();
+
+      if (session?.apartment) {
+        knownApartment = session.apartment;
+      }
+    }
+
+    // Check if user is telling us their apartment in this message
+    const detectedApartment = detectApartment(message);
+    if (detectedApartment && !knownApartment) {
+      knownApartment = detectedApartment;
+
+      // Save apartment to session
+      if (currentSessionId) {
+        await supabase
+          .from('chat_sessions')
+          .update({ apartment: knownApartment })
+          .eq('id', currentSessionId);
       }
     }
 
@@ -93,7 +157,7 @@ export async function POST(request: Request) {
     }
 
     // Build system prompt with context (and web search if available)
-    let systemPrompt = buildSystemPrompt(detectedLanguage, chunks, confidence);
+    let systemPrompt = buildSystemPrompt(detectedLanguage, chunks, confidence, knownApartment);
     if (webSearchContext) {
       systemPrompt += '\n\n' + webSearchContext;
     }
