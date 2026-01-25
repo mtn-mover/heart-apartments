@@ -66,26 +66,6 @@ export async function retrieveContext(query: string): Promise<RetrievalResult> {
   };
 }
 
-// Keywords that should trigger Diana contact (things bot cannot handle)
-const DIANA_KEYWORDS = [
-  // Booking/payment
-  'booking', 'buchung', 'reservation', 'reservierung',
-  'payment', 'zahlung', 'bezahlung', 'refund', 'rückerstattung',
-  'cancel', 'stornierung', 'stornieren', 'absagen',
-  'special request', 'sonderwunsch', 'besondere anfrage',
-  'complaint', 'beschwerde', 'reklamation',
-  'early check-in', 'früher einchecken', 'late checkout', 'später auschecken',
-  'discount', 'rabatt',
-  'änderung buchung', 'change booking', 'modify reservation',
-  // Maintenance/defects - Diana needs to arrange repair/replacement
-  'kaputt', 'broken', 'defekt', 'defect',
-  'funktioniert nicht', 'does not work', 'doesn\'t work', 'geht nicht',
-  'ersatz', 'replacement', 'austausch',
-  'reparatur', 'repair', 'reparieren',
-  'lampe', 'lamp', 'licht', 'light',
-  'beschädigt', 'damaged', 'schaden',
-];
-
 // Greetings and small talk - don't suggest Diana for these
 const GREETING_PATTERNS = [
   'hallo', 'hello', 'hi', 'hey', 'guten tag', 'guten morgen', 'guten abend',
@@ -109,7 +89,6 @@ export function shouldSuggestDiana(
   userMessage: string,
   assistantResponse: string
 ): boolean {
-  const lowerMessage = userMessage.toLowerCase();
   const lowerResponse = assistantResponse.toLowerCase();
 
   // Never suggest Diana for greetings or small talk
@@ -117,47 +96,36 @@ export function shouldSuggestDiana(
     return false;
   }
 
-  // Booking/payment topics → always Diana (bot cannot handle these)
-  if (DIANA_KEYWORDS.some((kw) => lowerMessage.includes(kw))) {
-    return true;
-  }
-
-  // Check if bot gave a confident, helpful answer
-  // Signs of a GOOD answer (don't suggest Diana):
-  const goodAnswerSigns = [
-    // Bot gave specific instructions
-    'schritt', 'step', 'anleitung',
-    // Bot gave specific info
-    'passwort', 'password', '16:00', '10:00',
-    // Bot asked a clarifying question (working on it)
-    'in welchem apartment', 'which apartment',
+  // SMART APPROACH: If the bot itself suggests contacting Diana → show WhatsApp button
+  // This lets Claude decide when Diana is needed, rather than keyword guessing
+  const botSuggestsDiana = [
+    // German
+    'diana kontaktieren', 'kontaktiere diana', 'schreib diana',
+    'diana schreiben', 'diana fragen', 'frag diana',
+    'diana melden', 'melde dich bei diana', 'wende dich an diana',
+    'diana bescheid', 'sag diana', 'diana direkt',
+    // English
+    'contact diana', 'message diana', 'reach out to diana',
+    'ask diana', 'let diana know', 'tell diana',
+    // French
+    'contacter diana', 'écrire à diana', 'demander à diana',
   ];
 
-  if (goodAnswerSigns.some((sign) => lowerResponse.includes(sign))) {
-    return false;
+  if (botSuggestsDiana.some((phrase) => lowerResponse.includes(phrase))) {
+    return true;
   }
 
-  // Signs of UNCERTAINTY in bot's response → suggest Diana
-  const uncertainPhrases = [
-    "i'm not sure", "ich bin nicht sicher",
-    "i don't have", "ich habe keine",
-    "keine information", "no information",
-    "cannot help", "kann nicht helfen",
-    "please contact", "bitte kontaktieren",
-    "nicht verfügbar", "not available",
-    "weiß ich nicht", "i don't know",
-    "leider", "unfortunately",
+  // Also catch generic "contact" suggestions that imply Diana
+  const genericContactPhrases = [
+    'direkt kontaktieren', 'directly contact',
+    'persönlich kontaktieren', 'personally contact',
+    'am besten kontaktieren', 'best to contact',
   ];
 
-  if (uncertainPhrases.some((phrase) => lowerResponse.includes(phrase))) {
+  if (genericContactPhrases.some((phrase) => lowerResponse.includes(phrase))) {
     return true;
   }
 
-  // Very low RAG confidence AND short response → probably couldn't help
-  if (confidence < 0.25 && assistantResponse.length < 200) {
-    return true;
-  }
-
-  // Default: bot handled it
+  // Default: bot handled it, no WhatsApp needed
   return false;
 }
