@@ -33,23 +33,24 @@ const REALTIME_KEYWORDS = [
 ];
 
 // Destinations/attractions that guests commonly ask about
-// Include common typos, partial words, and variations to catch more queries
+// Include common typos, partial words, grammatical forms, and variations
 const INTERLAKEN_ATTRACTIONS = [
-  // Jungfraujoch (many spelling variations and typos)
-  'jungfraujoch', 'jungfrau', 'jungrau', 'jungfraubahn', 'top of europe',
-  // Schynige Platte (many spelling variations and typos)
-  'schynige', 'schinige', 'swchinige',
+  // Jungfraujoch (many variations)
+  'jungfraujoch', 'jungfrau', 'jungrau', 'jungfraubahn', 'top of europe', 'joch',
+  // Schynige Platte (including German grammatical forms: die schynige, der schynigen, etc.)
+  'schynig', // catches schynige, schynigen, schyniger
+  'schinig', // catches schinige, schinigen
   // Other mountains
-  'schilthorn', 'piz gloria', 'harder kulm', 'harder', 'niederhorn', 'niesen',
-  'grindelwald first', 'first bahn', 'männlichen', 'mannlichen', 'kleine scheidegg',
+  'schilthorn', 'piz gloria', 'harder', 'niederhorn', 'niesen', 'stockhorn',
+  'first', 'männlich', 'mannlich', 'scheidegg', 'eiger', 'mönch',
   // Waterfalls and gorges
-  'trümmelbach', 'trummelbach', 'aareschlucht', 'aare schlucht',
+  'trümmelbach', 'trummelbach', 'aareschlucht', 'giessbach',
   // Caves and lakes
-  'beatushöhlen', 'beatus', 'blausee', 'oeschinensee', 'brienzersee', 'thunersee',
+  'beatushöhle', 'beatus', 'blausee', 'oeschinen', 'brienzer', 'thuner',
   // Activities
-  'paragliding', 'gleitschirm', 'skywings', 'tandemflug',
-  // General activity keywords that suggest wanting to do something
-  'bergbahn', 'seilbahn', 'gondel', 'ausflug', 'wandern', 'wanderung', 'besichtigen',
+  'paraglid', 'gleitschirm', 'skywing', 'tandem', 'bungy', 'canyon',
+  // General activity keywords
+  'bergbahn', 'seilbahn', 'gondel', 'ausflug', 'wandern', 'besichtig',
 ];
 
 export interface WebSearchResult {
