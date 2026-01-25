@@ -93,7 +93,8 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
 
     // Add location context AND availability keywords to the query
     // This ensures we get current opening status, not just general info
-    const enhancedQuery = `${query} Interlaken Schweiz öffnungszeiten aktuell geöffnet 2025`;
+    const currentYear = new Date().getFullYear();
+    const enhancedQuery = `${query} Interlaken Schweiz öffnungszeiten aktuell geöffnet ${currentYear}`;
 
     const response = await client.search(enhancedQuery, {
       searchDepth: 'basic',
@@ -127,10 +128,13 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
  * Build a context string from web search results
  */
 export function buildWebSearchContext(searchResult: WebSearchResult, language: string): string {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('de-CH', { month: 'long', year: 'numeric' });
+
   return `
 ## CRITICAL: REAL-TIME WEB SEARCH RESULTS - YOU MUST USE THIS!
 
-The following information was just retrieved from the internet (January 2025) and is CURRENT.
+The following information was just retrieved from the internet (${dateStr}) and is CURRENT.
 
 **Live Search Results:**
 ${searchResult.results}
