@@ -76,25 +76,113 @@
 ## RAG-Chatbot "Diana's Assistent"
 
 ### Architektur
-- **LLM:** Claude Sonnet (Anthropic)
+- **LLM:** Claude Sonnet (claude-sonnet-4-20250514)
 - **Embeddings:** OpenAI text-embedding-3-small
-- **Vector-DB:** Supabase pgvector
+- **Vector-DB:** Supabase pgvector (Similarity Threshold: 0.3)
 - **WhatsApp:** Twilio API (Fallback zu Diana)
+- **Sprachen:** Automatische Erkennung (DE/EN/FR)
 
 ### Wichtige Dateien
-- `/lib/rag/prompts.ts` - System-Prompt mit kritischen Infos
-- `/lib/rag/retrieval.ts` - RAG-Suche und Diana-Trigger
-- `/app/api/chat/route.ts` - Chat-API
-- `/app/api/whatsapp/route.ts` - WhatsApp-API
-- `/components/chat/` - Chat-UI Komponenten
-- `/scripts/ingest-documents.ts` - Dokumente in Supabase laden
-- `/scripts/test-chat.ts` - Chatbot-Tests
+| Datei | Zweck |
+|-------|-------|
+| `/lib/rag/prompts.ts` | System-Prompt, kritische Infos, Begrüßung |
+| `/lib/rag/retrieval.ts` | RAG-Suche, Diana-Trigger Keywords |
+| `/lib/rag/types.ts` | TypeScript Interfaces |
+| `/app/api/chat/route.ts` | Chat-API, Spracherkennung |
+| `/app/api/whatsapp/route.ts` | WhatsApp-API |
+| `/lib/twilio.ts` | Twilio Client, Bestätigungsnachrichten |
+| `/components/chat/` | Chat-UI Komponenten |
+| `/scripts/ingest-documents.ts` | Dokumente in Supabase laden |
+| `/scripts/test-chat.ts` | Chatbot-Tests |
+| `/Bot_Info/*.docx` | Quelldokumente für RAG |
 
-### Dokumente aktualisieren
+### Environment Variables (.env.local)
+```
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_KEY=eyJ...
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+DIANA_WHATSAPP_NUMBER=whatsapp:+41...
+```
+
+---
+
+## Chatbot Anpassungen
+
+### 1. Kritische Apartment-Infos ändern
+**Datei:** `/lib/rag/prompts.ts` → `buildSystemPrompt()`
+
+Aktuelle Konfiguration:
+```
+WiFi Passwords:
+- HEART1-4: Network "Diana", Password: Air38Dia04BnB
+- HEART5: Network "Diana", Password: Air38Dia18BnB
+
+Washing Machine:
+- HEART1-4: YES (shared, ground floor)
+- HEART5: NO → "wash & go" Postgasse 18
+
+Check-in: 16:00 | Check-out: 10:00
+Late arrival: Schlüsselbox, Code bei Diana anfragen
+```
+
+### 2. Begrüßungsnachricht ändern
+**Datei:** `/lib/rag/prompts.ts` → `getWelcomeMessage()`
+
+Verfügbare Sprachen: `de`, `en`, `fr`
+
+### 3. WhatsApp-Bestätigung ändern
+**Datei:** `/lib/twilio.ts` → `getConfirmationMessage()`
+
+### 4. Wann WhatsApp-Button erscheint
+**Datei:** `/lib/rag/retrieval.ts`
+
+**Diana-Keywords** (lösen WhatsApp aus):
+```
+booking, buchung, reservation, payment, zahlung, refund,
+cancel, stornierung, special request, problem, complaint,
+early check-in, late checkout, price, discount, änderung
+```
+
+**Greeting-Patterns** (kein WhatsApp):
+```
+hallo, hello, hi, hey, guten tag, danke, thank, merci, bye
+```
+
+### 5. RAG-Dokumente aktualisieren
 ```sh
-# Word-Docs in Bot_Info/ ändern, dann:
+# 1. Word-Docs in Bot_Info/ ändern
+# 2. Script ausführen:
 npx tsx scripts/ingest-documents.ts
 ```
+
+**Aktuell geladene Dokumente:**
+- `Wohnungsinfo heart 1-4.docx` (22 Chunks)
+- `Wohnungsinfo Heart 5.docx` (21 Chunks)
+- `heart 4 elektrische Heizung...docx` (1 Chunk)
+- `Diverse Links.docx` (1 Chunk)
+- + 5 Apartments aus `/data/apartments.ts`
+
+### 6. Neue Sprache hinzufügen
+1. `/lib/rag/prompts.ts` → Messages-Objekte erweitern
+2. `/lib/twilio.ts` → `getConfirmationMessage()` erweitern
+3. `/app/api/chat/route.ts` → `detectLanguage()` erweitern
+
+### 7. Chatbot testen
+```sh
+npx tsx scripts/test-chat.ts
+```
+Testet: WiFi, Waschmaschine, Heizung, Check-in, lokale Tipps
+
+### 8. Bot-Regeln (System-Prompt)
+- Fragt IMMER zuerst nach Wohnung bei apartment-spezifischen Themen
+- Zeigt KEINE Telefonnummern/Kontaktdaten (nur WhatsApp-Button)
+- Antwortet in der Sprache des Gastes
+- Bei Unsicherheit → WhatsApp an Diana
 
 ---
 
