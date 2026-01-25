@@ -66,16 +66,25 @@ export async function retrieveContext(query: string): Promise<RetrievalResult> {
   };
 }
 
-// Keywords that should trigger Diana contact
+// Keywords that should trigger Diana contact (booking/payment issues only)
 const DIANA_KEYWORDS = [
   'booking', 'buchung', 'reservation', 'reservierung',
   'payment', 'zahlung', 'bezahlung', 'refund', 'rückerstattung',
   'cancel', 'stornierung', 'stornieren', 'absagen',
   'special request', 'sonderwunsch', 'besondere anfrage',
-  'problem', 'issue', 'complaint', 'beschwerde',
+  'complaint', 'beschwerde', 'reklamation',
   'early check-in', 'früher einchecken', 'late checkout', 'später auschecken',
-  'price', 'preis', 'discount', 'rabatt', 'kosten',
-  'änderung', 'change', 'modify',
+  'discount', 'rabatt',
+  'änderung buchung', 'change booking', 'modify reservation',
+];
+
+// Technical topics the bot CAN handle - don't suggest Diana for these
+const TECHNICAL_TOPICS = [
+  'warmwasser', 'hot water', 'boiler', 'heizung', 'heating',
+  'wifi', 'wlan', 'internet', 'passwort', 'password',
+  'waschmaschine', 'washing', 'küche', 'kitchen',
+  'schlüssel', 'key', 'tür', 'door', 'code',
+  'tv', 'fernseher', 'kaffeemaschine', 'coffee',
 ];
 
 // Greetings and small talk - don't suggest Diana for these
@@ -108,7 +117,12 @@ export function shouldSuggestDiana(
     return false;
   }
 
-  // Check for Diana-specific keywords FIRST (these always need Diana)
+  // Never suggest Diana for technical topics the bot can handle
+  if (TECHNICAL_TOPICS.some((topic) => lowerMessage.includes(topic))) {
+    return false;
+  }
+
+  // Check for Diana-specific keywords (booking/payment only)
   if (DIANA_KEYWORDS.some((kw) => lowerMessage.includes(kw))) {
     return true;
   }
