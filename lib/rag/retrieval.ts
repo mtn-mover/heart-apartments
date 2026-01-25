@@ -125,12 +125,20 @@ export function shouldSuggestDiana(
     'wende dich an diana', 'diana kann dir helfen',
     'diana wird dir helfen', 'am besten diana',
     'diana direkt kontaktieren', 'schreib diana direkt',
+    'diana kontaktieren', 'kontaktiere diana',
+    'diana informieren', 'informiere diana',
+    'diana sollte', 'schreib diana', 'erreiche diana',
+    'diana bescheid', 'melde diana', 'sag diana',
+    // Damage / problems that need Diana
+    'schaden', 'kaputt', 'defekt', 'broken', 'damage',
+    'problem', 'issue', 'nicht funktioniert', 'doesn\'t work',
     // Starting the response with Diana suggestion
     'für diese anfrage', 'for this request',
     'dafür ist diana', 'diana ist zuständig',
     // English
     'please contact diana', 'diana can help',
     'diana will help', 'best to contact diana',
+    'contact diana', 'reach diana', 'tell diana',
     // French
     'contacte diana', 'diana peut t\'aider',
   ];
