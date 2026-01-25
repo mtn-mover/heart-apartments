@@ -91,12 +91,13 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
   try {
     const client = getTavilyClient();
 
-    // Add location context to the query
-    const enhancedQuery = `${query} Interlaken Schweiz Switzerland`;
+    // Add location context AND availability keywords to the query
+    // This ensures we get current opening status, not just general info
+    const enhancedQuery = `${query} Interlaken Schweiz öffnungszeiten aktuell geöffnet 2025`;
 
     const response = await client.search(enhancedQuery, {
       searchDepth: 'basic',
-      maxResults: 3,
+      maxResults: 5,
       includeAnswer: true,
     });
 
@@ -127,15 +128,22 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
  */
 export function buildWebSearchContext(searchResult: WebSearchResult, language: string): string {
   return `
-## IMPORTANT: LIVE WEB SEARCH RESULTS - USE THIS INFORMATION!
-The following information was just retrieved from the internet and is CURRENT and ACCURATE.
-You MUST use this information to answer the user's question. Do NOT say "I don't know" or "check the website" when this information is provided.
+## CRITICAL: REAL-TIME WEB SEARCH RESULTS - YOU MUST USE THIS!
 
-**Search Results:**
+The following information was just retrieved from the internet (January 2025) and is CURRENT.
+
+**Live Search Results:**
 ${searchResult.results}
 
 **Sources:** ${searchResult.sources.slice(0, 2).join(', ')}
 
-INSTRUCTION: Base your answer on the web search results above. Present the information clearly and helpfully.
+## YOUR RESPONSE MUST:
+1. **START with availability status** - First sentence must clearly state if the attraction is OPEN or CLOSED right now
+   - Example: "✅ Das Jungfraujoch ist aktuell geöffnet!" or "⚠️ Die Schynige Platte hat Winterpause (bis Mai)."
+2. **Include specific info** from the search results (opening hours, prices, conditions)
+3. **THEN add** Diana's tips from the knowledge base
+4. Do NOT just give links - give the actual information!
+
+If the search results don't clearly indicate availability, say so honestly.
 `;
 }
