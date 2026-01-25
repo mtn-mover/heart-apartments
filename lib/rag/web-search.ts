@@ -52,29 +52,24 @@ export interface WebSearchResult {
 export function needsWebSearch(message: string): boolean {
   const lowerMessage = message.toLowerCase();
 
-  // Check for real-time keywords
-  const hasRealtimeKeyword = REALTIME_KEYWORDS.some((keyword) =>
-    lowerMessage.includes(keyword)
-  );
-
-  // Check if asking about attractions (might need current info)
+  // Check if asking about attractions - ALWAYS search to check availability!
   const asksAboutAttraction = INTERLAKEN_ATTRACTIONS.some((attraction) =>
     lowerMessage.includes(attraction)
   );
 
-  // Needs web search if has realtime keyword AND mentions an attraction
-  // OR if specifically asking about opening times, weather, schedules
-  const specificRealtimeQuestions = [
-    'offen', 'geöffnet', 'öffnungszeiten', 'open', 'opening',
+  // If asking about ANY attraction, always do web search to check if it's open/available
+  if (asksAboutAttraction) {
+    return true;
+  }
+
+  // Also search for general real-time questions (weather, schedules without specific attraction)
+  const generalRealtimeQuestions = [
     'wetter', 'weather', 'météo',
-    'fahrplan', 'zug', 'train', 'schedule',
+    'fahrplan', 'schedule', 'timetable',
+    'heute', 'today', 'morgen', 'tomorrow',
   ];
 
-  const isSpecificRealtimeQuestion = specificRealtimeQuestions.some((q) =>
-    lowerMessage.includes(q)
-  );
-
-  return (hasRealtimeKeyword && asksAboutAttraction) || isSpecificRealtimeQuestion;
+  return generalRealtimeQuestions.some((q) => lowerMessage.includes(q));
 }
 
 /**
