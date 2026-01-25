@@ -66,8 +66,9 @@ export async function retrieveContext(query: string): Promise<RetrievalResult> {
   };
 }
 
-// Keywords that should trigger Diana contact (booking/payment issues only)
+// Keywords that should trigger Diana contact (things bot cannot handle)
 const DIANA_KEYWORDS = [
+  // Booking/payment
   'booking', 'buchung', 'reservation', 'reservierung',
   'payment', 'zahlung', 'bezahlung', 'refund', 'rückerstattung',
   'cancel', 'stornierung', 'stornieren', 'absagen',
@@ -76,6 +77,13 @@ const DIANA_KEYWORDS = [
   'early check-in', 'früher einchecken', 'late checkout', 'später auschecken',
   'discount', 'rabatt',
   'änderung buchung', 'change booking', 'modify reservation',
+  // Maintenance/defects - Diana needs to arrange repair/replacement
+  'kaputt', 'broken', 'defekt', 'defect',
+  'funktioniert nicht', 'does not work', 'doesn\'t work', 'geht nicht',
+  'ersatz', 'replacement', 'austausch',
+  'reparatur', 'repair', 'reparieren',
+  'lampe', 'lamp', 'licht', 'light',
+  'beschädigt', 'damaged', 'schaden',
 ];
 
 // Greetings and small talk - don't suggest Diana for these
