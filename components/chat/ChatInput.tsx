@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -8,9 +8,30 @@ interface ChatInputProps {
   placeholder?: string;
 }
 
-export default function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
+export interface ChatInputRef {
+  focus: () => void;
+}
+
+const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
+  function ChatInput({ onSend, disabled, placeholder }, ref) {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Expose focus method to parent
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      textareaRef.current?.focus();
+    },
+  }));
+
+  // Focus on mount
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -93,4 +114,6 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
       </div>
     </form>
   );
-}
+});
+
+export default ChatInput;

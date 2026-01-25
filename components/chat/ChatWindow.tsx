@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import ChatMessage from './ChatMessage';
-import ChatInput from './ChatInput';
+import ChatInput, { type ChatInputRef } from './ChatInput';
 import QuickActions from './QuickActions';
 import WhatsAppForm from './WhatsAppForm';
 import { getWelcomeMessage } from '@/lib/rag/prompts';
@@ -22,6 +22,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
   const [lastQuestion, setLastQuestion] = useState('');
   const [conversationLanguage, setConversationLanguage] = useState(locale);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<ChatInputRef>(null);
 
   // Initialize with welcome message
   useEffect(() => {
@@ -100,6 +101,8 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      // Re-focus input after response
+      setTimeout(() => chatInputRef.current?.focus(), 50);
     }
   };
 
@@ -252,6 +255,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
             <QuickActions onSelect={sendMessage} locale={locale} />
           )}
           <ChatInput
+            ref={chatInputRef}
             onSend={sendMessage}
             disabled={isLoading}
             placeholder={inputPlaceholder}
