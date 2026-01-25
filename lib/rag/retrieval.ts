@@ -96,33 +96,46 @@ export function shouldSuggestDiana(
     return false;
   }
 
-  // SMART APPROACH: If the bot itself suggests contacting Diana → show WhatsApp button
-  // This lets Claude decide when Diana is needed, rather than keyword guessing
-  const botSuggestsDiana = [
-    // German
-    'diana kontaktieren', 'kontaktiere diana', 'schreib diana',
-    'diana schreiben', 'diana fragen', 'frag diana',
-    'diana melden', 'melde dich bei diana', 'wende dich an diana',
-    'diana bescheid', 'sag diana', 'diana direkt',
-    // English
-    'contact diana', 'message diana', 'reach out to diana',
-    'ask diana', 'let diana know', 'tell diana',
-    // French
-    'contacter diana', 'écrire à diana', 'demander à diana',
+  // FALLBACK PHRASES - if Diana is mentioned as a fallback, DON'T show button
+  // The bot gave a good answer and Diana is just a backup option
+  const fallbackPhrases = [
+    'falls es', 'if it', 'wenn es', // "Falls es nicht funktioniert..."
+    'falls das', 'if that', 'wenn das',
+    'ansonsten', 'otherwise', 'sonst',
+    'immer noch', 'still', 'weiterhin',
+    'sollte das', 'should that',
   ];
 
-  if (botSuggestsDiana.some((phrase) => lowerResponse.includes(phrase))) {
-    return true;
+  // Check if Diana mention is in a fallback context
+  const hasFallbackContext = fallbackPhrases.some((phrase) => {
+    const phraseIndex = lowerResponse.indexOf(phrase);
+    const dianaIndex = lowerResponse.indexOf('diana');
+    // Fallback phrase appears before Diana mention (within 100 chars)
+    return phraseIndex !== -1 && dianaIndex !== -1 && phraseIndex < dianaIndex && (dianaIndex - phraseIndex) < 100;
+  });
+
+  if (hasFallbackContext) {
+    return false; // Bot gave good answer, Diana is just backup
   }
 
-  // Also catch generic "contact" suggestions that imply Diana
-  const genericContactPhrases = [
-    'direkt kontaktieren', 'directly contact',
-    'persönlich kontaktieren', 'personally contact',
-    'am besten kontaktieren', 'best to contact',
+  // PRIMARY DIANA PHRASES - bot is recommending Diana as the main solution
+  const primaryDianaPhrases = [
+    // German - Diana as main recommendation
+    'bitte kontaktiere diana', 'kontaktiere bitte diana',
+    'wende dich an diana', 'diana kann dir helfen',
+    'diana wird dir helfen', 'am besten diana',
+    'diana direkt kontaktieren', 'schreib diana direkt',
+    // Starting the response with Diana suggestion
+    'für diese anfrage', 'for this request',
+    'dafür ist diana', 'diana ist zuständig',
+    // English
+    'please contact diana', 'diana can help',
+    'diana will help', 'best to contact diana',
+    // French
+    'contacte diana', 'diana peut t\'aider',
   ];
 
-  if (genericContactPhrases.some((phrase) => lowerResponse.includes(phrase))) {
+  if (primaryDianaPhrases.some((phrase) => lowerResponse.includes(phrase))) {
     return true;
   }
 
