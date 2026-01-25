@@ -189,12 +189,41 @@ export async function POST(request: Request) {
       content: message,
     });
 
+    // Check if this is a query that likely needs web search (real-time info)
+    const lowerMessage = message.toLowerCase();
+    const needsWebSearch = new RegExp([
+      // Weather
+      'wetter', 'weather', 'météo', 'meteo', 'regen', 'rain', 'schnee', 'snow', 'sonne', 'sun',
+      // Time/dates
+      'heute', 'today', "aujourd'hui", 'morgen', 'tomorrow', 'demain',
+      'wochenende', 'weekend', 'diese woche', 'this week', 'cette semaine',
+      // Opening hours / availability
+      'öffnungszeit', 'opening', 'geöffnet', 'offen', 'open', 'ouvert',
+      'geschlossen', 'closed', 'fermé', 'winterpause', 'saison',
+      // Prices
+      'preis', 'price', 'prix', 'kosten', 'cost', 'coût', 'ticket', 'eintritt',
+      // Current info
+      'aktuell', 'current', 'actuel', 'jetzt', 'now', 'maintenant',
+      // Events / activities
+      'event', 'veranstaltung', 'événement', 'fahrplan', 'schedule', 'horaire',
+      'zug', 'train', 'bus', 'schiff', 'boat', 'seilbahn', 'cable car',
+      // Attractions (always check availability)
+      'jungfrau', 'schynige', 'harder', 'first', 'grindelwald', 'lauterbrunnen',
+      'paragliding', 'gleitschirm',
+    ].join('|'), 'i').test(lowerMessage);
+
+    const toolChoiceConfig = needsWebSearch
+      ? { type: 'tool' as const, name: 'search_web' }
+      : { type: 'auto' as const };
+
     // First call to Claude with the search_web tool available
+    // For queries that clearly need real-time info, require tool use
     let response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: systemPrompt,
       tools: [WEB_SEARCH_TOOL],
+      tool_choice: toolChoiceConfig,
       messages,
     });
 
@@ -210,21 +239,15 @@ export async function POST(request: Request) {
 
       // Execute the web search
       const searchQuery = (toolUseBlock.input as { query: string }).query;
-      console.log('Claude requested web search:', searchQuery);
+      const searchResult = await searchWeb(searchQuery, detectedLanguage);
 
       let toolResult: string;
-      try {
-        const searchResult = await searchWeb(searchQuery, detectedLanguage);
-        if (searchResult) {
-          const now = new Date();
-          const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
-          toolResult = `Web search results (${dateStr}):\n\n${searchResult.results}\n\nSources: ${searchResult.sources.slice(0, 2).join(', ')}`;
-        } else {
-          toolResult = 'No results found for this search query.';
-        }
-      } catch (error) {
-        console.error('Web search failed:', error);
-        toolResult = 'Web search failed. Please answer based on your existing knowledge.';
+      if (searchResult) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
+        toolResult = `Web search results (${dateStr}):\n\n${searchResult.results}\n\nSources: ${searchResult.sources.slice(0, 2).join(', ')}`;
+      } else {
+        toolResult = 'No results found for this search query.';
       }
 
       // Continue the conversation with the tool result

@@ -25,27 +25,42 @@ export interface WhatsAppMessage {
   apartmentId?: string;
 }
 
-export async function sendWhatsAppToDiana(message: WhatsAppMessage): Promise<boolean> {
+export async function sendWhatsAppToDiana(message: WhatsAppMessage): Promise<{ success: boolean; error?: string }> {
   const twilioWhatsAppNumber = process.env.TWILIO_WHATSAPP_NUMBER;
   const dianaWhatsAppNumber = process.env.DIANA_WHATSAPP_NUMBER;
 
+  // Debug logging
+  console.log('Twilio config check:', {
+    hasAccountSid: !!process.env.TWILIO_ACCOUNT_SID,
+    accountSidLength: process.env.TWILIO_ACCOUNT_SID?.length,
+    hasAuthToken: !!process.env.TWILIO_AUTH_TOKEN,
+    authTokenLength: process.env.TWILIO_AUTH_TOKEN?.length,
+    twilioNumber: twilioWhatsAppNumber,
+    dianaNumber: dianaWhatsAppNumber?.substring(0, 15) + '...',
+  });
+
   if (!twilioWhatsAppNumber || !dianaWhatsAppNumber) {
     console.error('WhatsApp numbers are not configured');
-    return false;
+    return { success: false, error: 'WhatsApp numbers not configured' };
   }
 
   const formattedMessage = formatMessageForDiana(message);
 
   try {
-    await getTwilioClient().messages.create({
+    const result = await getTwilioClient().messages.create({
       body: formattedMessage,
       from: twilioWhatsAppNumber,
       to: dianaWhatsAppNumber,
     });
-    return true;
+    console.log('Twilio message sent:', result.sid);
+    return { success: true };
   } catch (error) {
-    console.error('Error sending WhatsApp message:', error);
-    return false;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Twilio error details:', {
+      message: errorMessage,
+      error: error,
+    });
+    return { success: false, error: errorMessage };
   }
 }
 

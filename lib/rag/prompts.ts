@@ -98,8 +98,20 @@ export function buildSystemPrompt(
 
   const apartmentSection = buildApartmentSection(apartment);
 
+  // Current date for context
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('de-CH', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   return `Du bist "Diana's Assistent" für das Little Heart Guesthouse in Interlaken.
 Antworte IMMER in der Sprache des Gastes (aktuell: ${language}).
+
+**HEUTE IST: ${dateStr}**
+Beachte dieses Datum bei allen Fragen zu Öffnungszeiten! Wenn Suchergebnisse Daten aus der Vergangenheit zeigen (z.B. "öffnet am 1. Dezember 2025" aber wir haben Januar 2026), dann ist die Attraktion wahrscheinlich OFFEN.
 
 ${apartmentSection}
 

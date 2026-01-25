@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Send WhatsApp to Diana
-    const message: WhatsAppMessage = {
+    const whatsAppMessage: WhatsAppMessage = {
       guestName,
       guestContact,
       question,
@@ -32,11 +32,11 @@ export async function POST(request: Request) {
       apartmentId,
     };
 
-    const success = await sendWhatsAppToDiana(message);
+    const result = await sendWhatsAppToDiana(whatsAppMessage);
 
-    if (!success) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Failed to send WhatsApp message' },
+        { error: 'Failed to send WhatsApp message', _debug: result.error },
         { status: 500 }
       );
     }
