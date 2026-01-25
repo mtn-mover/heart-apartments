@@ -33,11 +33,23 @@ const REALTIME_KEYWORDS = [
 ];
 
 // Destinations/attractions that guests commonly ask about
+// Include common typos, partial words, and variations to catch more queries
 const INTERLAKEN_ATTRACTIONS = [
-  'jungfraujoch', 'schilthorn', 'harder kulm', 'niederhorn', 'niesen',
-  'schynige platte', 'grindelwald first', 'männlichen', 'kleine scheidegg',
-  'trümmelbachfälle', 'aareschlucht', 'beatushöhlen', 'blausee', 'oeschinensee',
-  'brienzersee', 'thunersee', 'paragliding', 'skywings',
+  // Jungfraujoch (many spelling variations and typos)
+  'jungfraujoch', 'jungfrau', 'jungrau', 'jungfraubahn', 'top of europe',
+  // Schynige Platte (many spelling variations and typos)
+  'schynige', 'schinige', 'swchinige',
+  // Other mountains
+  'schilthorn', 'piz gloria', 'harder kulm', 'harder', 'niederhorn', 'niesen',
+  'grindelwald first', 'first bahn', 'männlichen', 'mannlichen', 'kleine scheidegg',
+  // Waterfalls and gorges
+  'trümmelbach', 'trummelbach', 'aareschlucht', 'aare schlucht',
+  // Caves and lakes
+  'beatushöhlen', 'beatus', 'blausee', 'oeschinensee', 'brienzersee', 'thunersee',
+  // Activities
+  'paragliding', 'gleitschirm', 'skywings', 'tandemflug',
+  // General activity keywords that suggest wanting to do something
+  'bergbahn', 'seilbahn', 'gondel', 'ausflug', 'wandern', 'wanderung', 'besichtigen',
 ];
 
 export interface WebSearchResult {
