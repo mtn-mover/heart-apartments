@@ -78,15 +78,6 @@ const DIANA_KEYWORDS = [
   'änderung buchung', 'change booking', 'modify reservation',
 ];
 
-// Technical topics the bot CAN handle - don't suggest Diana for these
-const TECHNICAL_TOPICS = [
-  'warmwasser', 'hot water', 'boiler', 'heizung', 'heating',
-  'wifi', 'wlan', 'internet', 'passwort', 'password',
-  'waschmaschine', 'washing', 'küche', 'kitchen',
-  'schlüssel', 'key', 'tür', 'door', 'code',
-  'tv', 'fernseher', 'kaffeemaschine', 'coffee',
-];
-
 // Greetings and small talk - don't suggest Diana for these
 const GREETING_PATTERNS = [
   'hallo', 'hello', 'hi', 'hey', 'guten tag', 'guten morgen', 'guten abend',
@@ -111,39 +102,54 @@ export function shouldSuggestDiana(
   assistantResponse: string
 ): boolean {
   const lowerMessage = userMessage.toLowerCase();
+  const lowerResponse = assistantResponse.toLowerCase();
 
   // Never suggest Diana for greetings or small talk
   if (isGreetingOrSmallTalk(userMessage)) {
     return false;
   }
 
-  // Never suggest Diana for technical topics the bot can handle
-  if (TECHNICAL_TOPICS.some((topic) => lowerMessage.includes(topic))) {
-    return false;
-  }
-
-  // Check for Diana-specific keywords (booking/payment only)
+  // Booking/payment topics → always Diana (bot cannot handle these)
   if (DIANA_KEYWORDS.some((kw) => lowerMessage.includes(kw))) {
     return true;
   }
 
-  // Check for uncertainty in response
-  const uncertainPhrases = [
-    "i'm not sure", "ich bin nicht sicher",
-    "i don't have information", "keine information",
-    "please contact", "bitte kontaktieren",
-    "i cannot", "ich kann nicht",
-    "not available", "nicht verfügbar",
+  // Check if bot gave a confident, helpful answer
+  // Signs of a GOOD answer (don't suggest Diana):
+  const goodAnswerSigns = [
+    // Bot gave specific instructions
+    'schritt', 'step', 'anleitung',
+    // Bot gave specific info
+    'passwort', 'password', '16:00', '10:00',
+    // Bot asked a clarifying question (working on it)
+    'in welchem apartment', 'which apartment',
   ];
 
-  const lowerResponse = assistantResponse.toLowerCase();
+  if (goodAnswerSigns.some((sign) => lowerResponse.includes(sign))) {
+    return false;
+  }
+
+  // Signs of UNCERTAINTY in bot's response → suggest Diana
+  const uncertainPhrases = [
+    "i'm not sure", "ich bin nicht sicher",
+    "i don't have", "ich habe keine",
+    "keine information", "no information",
+    "cannot help", "kann nicht helfen",
+    "please contact", "bitte kontaktieren",
+    "nicht verfügbar", "not available",
+    "weiß ich nicht", "i don't know",
+    "leider", "unfortunately",
+  ];
+
   if (uncertainPhrases.some((phrase) => lowerResponse.includes(phrase))) {
     return true;
   }
 
-  // If we found relevant documents (confidence > 0.3), the bot can answer
-  // Only suggest Diana if confidence is very low (indicates poor match)
-  // Threshold lowered because good semantic matches can still be 0.3-0.5
+  // Very low RAG confidence AND short response → probably couldn't help
+  if (confidence < 0.25 && assistantResponse.length < 200) {
+    return true;
+  }
 
+  // Default: bot handled it
   return false;
 }
