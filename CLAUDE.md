@@ -179,10 +179,14 @@ npx tsx scripts/test-chat.ts
 Testet: WiFi, Waschmaschine, Heizung, Check-in, lokale Tipps
 
 ### 8. Bot-Regeln (System-Prompt)
-- Fragt IMMER zuerst nach Wohnung bei apartment-spezifischen Themen
+- **HEART5 ist an einem ANDEREN ORT als HEART1-4!**
+- Fragt IMMER zuerst nach Wohnung bei: Lage, Ausstattung, Parken, Wegbeschreibung, WiFi, Waschmaschine, Heizung, Küche, Bad, etc.
+- Verwendet nur Infos aus dem richtigen Dokument:
+  - HEART1-4 → "Wohnungsinfo heart 1-4.docx"
+  - HEART5 → "Wohnungsinfo Heart 5.docx"
+- Allgemeine Fragen (Tipps, Check-in Zeit) werden ohne Wohnungsfrage beantwortet
 - Zeigt KEINE Telefonnummern/Kontaktdaten (nur WhatsApp-Button)
 - Antwortet in der Sprache des Gastes
-- Bei Unsicherheit → WhatsApp an Diana
 
 ---
 
