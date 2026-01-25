@@ -20,6 +20,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showWhatsAppForm, setShowWhatsAppForm] = useState(false);
   const [lastQuestion, setLastQuestion] = useState('');
+  const [conversationLanguage, setConversationLanguage] = useState(locale);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize with welcome message
@@ -68,9 +69,12 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
 
       const data: ChatResponse = await response.json();
 
-      // Update session ID
+      // Update session ID and detected language
       if (data.sessionId) {
         setSessionId(data.sessionId);
+      }
+      if (data.detectedLanguage) {
+        setConversationLanguage(data.detectedLanguage);
       }
 
       // Add assistant message
@@ -110,7 +114,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
           question: data.question,
           // Only include a brief note, not the full conversation
           conversationSummary: undefined,
-          language: locale,
+          language: conversationLanguage,
         }),
       });
 

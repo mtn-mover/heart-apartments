@@ -143,6 +143,7 @@ export async function POST(request: Request) {
       sessionId: currentSessionId || '',
       confidence,
       suggestWhatsApp,
+      detectedLanguage,
     };
 
     return NextResponse.json(chatResponse);

@@ -18,6 +18,7 @@ export interface ChatResponse {
   sessionId: string;
   confidence: number;
   suggestWhatsApp: boolean;
+  detectedLanguage: string;
 }
 
 export interface DocumentChunk {
