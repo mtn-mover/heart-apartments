@@ -79,6 +79,7 @@
 - **LLM:** Claude Sonnet (claude-sonnet-4-20250514)
 - **Embeddings:** OpenAI text-embedding-3-small
 - **Vector-DB:** Supabase pgvector (Similarity Threshold: 0.3)
+- **Web-Suche:** Tavily API (für aktuelle Infos)
 - **WhatsApp:** Twilio API (Fallback zu Diana)
 - **Sprachen:** Automatische Erkennung (DE/EN/FR)
 
@@ -87,6 +88,7 @@
 |-------|-------|
 | `/lib/rag/prompts.ts` | System-Prompt, kritische Infos, Begrüßung |
 | `/lib/rag/retrieval.ts` | RAG-Suche, Diana-Trigger Keywords |
+| `/lib/rag/web-search.ts` | Tavily Web-Suche für aktuelle Infos |
 | `/lib/rag/types.ts` | TypeScript Interfaces |
 | `/app/api/chat/route.ts` | Chat-API, Spracherkennung |
 | `/app/api/whatsapp/route.ts` | WhatsApp-API |
@@ -107,7 +109,24 @@ TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
 TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 DIANA_WHATSAPP_NUMBER=whatsapp:+41...
+TAVILY_API_KEY=tvly-...
 ```
+
+### Web-Suche (Tavily)
+Bot sucht automatisch im Web bei Fragen über:
+- **Öffnungszeiten:** "Ist die Schynige Platte offen?"
+- **Wetter:** "Wie ist das Wetter morgen?"
+- **Fahrpläne:** "Wann fährt der nächste Zug nach Grindelwald?"
+- **Events:** "Was gibt es diese Woche in Interlaken?"
+
+**Datei:** `/lib/rag/web-search.ts`
+
+Keywords die Web-Suche auslösen:
+```
+offen, geöffnet, öffnungszeiten, wetter, fahrplan, zug, train, schedule
+```
+
+Test: `npx tsx scripts/test-web-search.ts`
 
 ---
 
