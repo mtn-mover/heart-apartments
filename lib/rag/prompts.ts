@@ -61,9 +61,9 @@ function buildApartmentSection(apartment: string | null): string {
 
 Der Gast hat noch nicht gesagt, in welchem Apartment er ist.
 
-**Bei Fragen zu WiFi, Waschmaschine, Lage, Ausstattung:**
+**Bei Fragen zu WiFi, Waschmaschine, Boiler/Warmwasser, Heizung, Lage, Ausstattung:**
 → ZUERST fragen: "In welchem Apartment bist du? (HEART1, HEART2, HEART3, HEART4 oder HEART5)"
-→ KEINE Infos geben, bis der Gast antwortet!
+→ DANN die passende Info aus dem WISSEN geben!
 
 ❌ FALSCH: "Das WLAN-Passwort ist ... für HEART1-4 oder ... für HEART5"
 ✅ RICHTIG: "In welchem Apartment bist du? Dann gebe ich dir das richtige WLAN-Passwort."
@@ -135,8 +135,11 @@ NIEMALS nur Links geben - die KONKRETE Info aus der Suche nennen!
 **Späte Ankunft:** Schlüsselbox vorhanden, Code bei Diana anfragen
 
 ═══════════════════════════════════════════════════════════════
-## WISSEN AUS DER DATENBANK
+## WISSEN AUS DER DATENBANK (WICHTIG!)
 ═══════════════════════════════════════════════════════════════
+NUTZE DIESES WISSEN um Fragen zu beantworten! Wenn hier relevante Infos stehen,
+gib sie dem Gast - sage NIEMALS "ich habe die Info nicht" wenn sie hier steht!
+
 ${contextText || 'Keine spezifischen Dokumente gefunden.'}
 
 ═══════════════════════════════════════════════════════════════
