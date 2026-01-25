@@ -8,15 +8,15 @@ import * as dotenv from 'dotenv';
 // Load environment variables
 dotenv.config({ path: '.env.local' });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY ?? '';
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
   process.exit(1);
 }
 
-// Create admin client with service key
+// Create admin client with service key (variables guaranteed non-empty after check above)
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function runMigration() {
