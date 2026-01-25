@@ -14,45 +14,6 @@ function getTavilyClient() {
   return tavilyClient;
 }
 
-// Keywords that indicate a need for real-time/current information
-const REALTIME_KEYWORDS = [
-  // Opening hours / availability
-  'offen', 'geöffnet', 'öffnungszeiten', 'open', 'opening hours', 'closed', 'geschlossen',
-  'ouvert', 'fermé', 'horaires', 'saison', 'season', 'betrieb',
-  // Weather
-  'wetter', 'weather', 'météo', 'regen', 'rain', 'schnee', 'snow', 'temperatur',
-  // Transport / schedules
-  'fahrplan', 'zug', 'bus', 'train', 'schedule', 'timetable', 'abfahrt', 'departure',
-  'horaire', 'prochain', 'nächster', 'next', 'wie komme ich', 'how to get', 'how do i get',
-  'comment aller', 'anreise', 'hinfahrt',
-  // Events
-  'event', 'veranstaltung', 'festival', 'konzert', 'concert', 'heute', 'today', 'morgen',
-  'tomorrow', 'diese woche', 'this week', 'cette semaine', 'aktuell', 'current',
-  // Prices (can change)
-  'preis', 'kosten', 'price', 'cost', 'prix', 'ticket', 'eintritt', 'entry',
-];
-
-// Destinations/attractions that guests commonly ask about
-// Include common typos, partial words, grammatical forms, and variations
-const INTERLAKEN_ATTRACTIONS = [
-  // Jungfraujoch (many variations)
-  'jungfraujoch', 'jungfrau', 'jungrau', 'jungfraubahn', 'top of europe', 'joch',
-  // Schynige Platte (including German grammatical forms: die schynige, der schynigen, etc.)
-  'schynig', // catches schynige, schynigen, schyniger
-  'schinig', // catches schinige, schinigen
-  // Other mountains
-  'schilthorn', 'piz gloria', 'harder', 'niederhorn', 'niesen', 'stockhorn',
-  'first', 'männlich', 'mannlich', 'scheidegg', 'eiger', 'mönch',
-  // Waterfalls and gorges
-  'trümmelbach', 'trummelbach', 'aareschlucht', 'giessbach',
-  // Caves and lakes
-  'beatushöhle', 'beatus', 'blausee', 'oeschinen', 'brienzer', 'thuner',
-  // Activities
-  'paraglid', 'gleitschirm', 'skywing', 'tandem', 'bungy', 'canyon',
-  // General activity keywords
-  'bergbahn', 'seilbahn', 'gondel', 'ausflug', 'wandern', 'besichtig',
-];
-
 export interface WebSearchResult {
   query: string;
   results: string;
@@ -60,55 +21,17 @@ export interface WebSearchResult {
 }
 
 /**
- * Check if the message requires real-time information from the web
- */
-export function needsWebSearch(message: string): boolean {
-  const lowerMessage = message.toLowerCase();
-
-  // Check if asking about attractions - ALWAYS search to check availability!
-  const asksAboutAttraction = INTERLAKEN_ATTRACTIONS.some((attraction) =>
-    lowerMessage.includes(attraction)
-  );
-
-  // If asking about ANY attraction, always do web search to check if it's open/available
-  if (asksAboutAttraction) {
-    return true;
-  }
-
-  // Also search for general real-time questions (weather, schedules without specific attraction)
-  const generalRealtimeQuestions = [
-    'wetter', 'weather', 'météo',
-    'fahrplan', 'schedule', 'timetable',
-    'heute', 'today', 'morgen', 'tomorrow',
-  ];
-
-  return generalRealtimeQuestions.some((q) => lowerMessage.includes(q));
-}
-
-// Check if query is about weather (exported for use in route)
-export function isWeatherQuery(message: string): boolean {
-  const weatherTerms = ['wetter', 'weather', 'météo', 'temperatur', 'temperature', 'regen', 'rain', 'schnee', 'snow', 'sonnig', 'sunny'];
-  const lowerMessage = message.toLowerCase();
-  return weatherTerms.some((term) => lowerMessage.includes(term));
-}
-
-/**
  * Perform a web search using Tavily API
+ * Claude provides the query directly - no need for keyword enhancement
  */
 export async function searchWeb(query: string, language: string): Promise<WebSearchResult | null> {
   try {
     const client = getTavilyClient();
 
-    const currentYear = new Date().getFullYear();
-    let enhancedQuery: string;
-
-    if (isWeatherQuery(query)) {
-      // Weather-specific search
-      const today = new Date().toLocaleDateString('de-CH');
-      enhancedQuery = `Wetter Interlaken Schweiz Wettervorhersage ${today} aktuell`;
-    } else {
-      // Attractions/activities - search for opening hours
-      enhancedQuery = `${query} Interlaken Schweiz öffnungszeiten aktuell geöffnet ${currentYear}`;
+    // Add Interlaken context if not already present
+    let enhancedQuery = query;
+    if (!query.toLowerCase().includes('interlaken')) {
+      enhancedQuery = `${query} Interlaken Schweiz`;
     }
 
     const response = await client.search(enhancedQuery, {
@@ -121,7 +44,7 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
       return null;
     }
 
-    // Format results for the LLM
+    // Format results for Claude
     const formattedResults = response.results
       .map((r) => `- ${r.title}: ${r.content}`)
       .join('\n');
@@ -137,50 +60,4 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
     console.error('Web search error:', error);
     return null;
   }
-}
-
-/**
- * Build a context string from web search results
- */
-export function buildWebSearchContext(searchResult: WebSearchResult, language: string, isWeather: boolean = false): string {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
-
-  if (isWeather) {
-    return `
-## AKTUELLE WETTERDATEN - NUTZE DIESE INFORMATIONEN!
-
-Wetterdaten abgerufen am ${dateStr}:
-
-**Wetter-Informationen:**
-${searchResult.results}
-
-**Quelle:** ${searchResult.sources[0] || 'Web-Suche'}
-
-## DEINE ANTWORT MUSS:
-1. Die konkreten Wetterdaten aus der Suche nennen (Temperatur, Bedingungen)
-2. Für Aktivitäten: Einschätzen ob das Wetter geeignet ist
-3. NICHT sagen "ich kann das Wetter nicht abrufen" - du HAST die Daten!
-`;
-  }
-
-  return `
-## CRITICAL: REAL-TIME WEB SEARCH RESULTS - YOU MUST USE THIS!
-
-The following information was just retrieved from the internet (${dateStr}) and is CURRENT.
-
-**Live Search Results:**
-${searchResult.results}
-
-**Sources:** ${searchResult.sources.slice(0, 2).join(', ')}
-
-## YOUR RESPONSE MUST:
-1. **START with availability status** - First sentence must clearly state if the attraction is OPEN or CLOSED right now
-   - Example: "✅ Das Jungfraujoch ist aktuell geöffnet!" or "⚠️ Die Schynige Platte hat Winterpause (bis Mai)."
-2. **Include specific info** from the search results (opening hours, prices, conditions)
-3. **THEN add** Diana's tips from the knowledge base
-4. Do NOT just give links - give the actual information!
-
-If the search results don't clearly indicate availability, say so honestly.
-`;
 }

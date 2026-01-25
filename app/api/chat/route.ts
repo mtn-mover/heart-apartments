@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@/lib/supabase';
 import { retrieveContext, shouldSuggestDiana } from '@/lib/rag/retrieval';
 import { buildSystemPrompt } from '@/lib/rag/prompts';
-import { needsWebSearch, searchWeb, buildWebSearchContext, isWeatherQuery } from '@/lib/rag/web-search';
+import { searchWeb } from '@/lib/rag/web-search';
 import type { ChatRequest, ChatResponse } from '@/lib/rag/types';
 
 // Lazy initialization to prevent build-time errors
@@ -19,6 +19,32 @@ function getAnthropic(): Anthropic {
   }
   return anthropicInstance;
 }
+
+// Define the web search tool for Claude
+const WEB_SEARCH_TOOL: Anthropic.Tool = {
+  name: 'search_web',
+  description: `Search the internet for real-time information. Use this tool when you need:
+- Current weather forecasts
+- Opening hours or availability of attractions (Jungfraujoch, Schynige Platte, etc.)
+- Train/bus schedules
+- Current events or prices
+- Any information that might have changed recently
+
+Do NOT use this tool for:
+- WiFi passwords or apartment-specific info (you have this in your knowledge)
+- Check-in/check-out times (you know this)
+- Diana's contact info (you know this)`,
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      query: {
+        type: 'string',
+        description: 'The search query in German or English. Be specific about location (Interlaken) and what info you need.',
+      },
+    },
+    required: ['query'],
+  },
+};
 
 // Detect apartment from message content
 function detectApartment(text: string): string | null {
@@ -142,29 +168,11 @@ export async function POST(request: Request) {
     // Retrieve relevant context from RAG
     const { chunks, confidence } = await retrieveContext(message);
 
-    // Check if we need real-time web search
-    let webSearchContext = '';
-    const isWeather = isWeatherQuery(message);
-    if (needsWebSearch(message)) {
-      try {
-        const searchResult = await searchWeb(message, detectedLanguage);
-        if (searchResult) {
-          webSearchContext = buildWebSearchContext(searchResult, detectedLanguage, isWeather);
-        }
-      } catch (error) {
-        console.error('Web search failed:', error);
-        // Continue without web search results
-      }
-    }
-
-    // Build system prompt with context (and web search if available)
-    let systemPrompt = buildSystemPrompt(detectedLanguage, chunks, confidence, knownApartment);
-    if (webSearchContext) {
-      systemPrompt += '\n\n' + webSearchContext;
-    }
+    // Build system prompt with RAG context
+    const systemPrompt = buildSystemPrompt(detectedLanguage, chunks, confidence, knownApartment);
 
     // Build messages array for Claude
-    const messages: { role: 'user' | 'assistant'; content: string }[] = [];
+    const messages: Anthropic.MessageParam[] = [];
 
     // Add conversation history (last 10 messages for context)
     const recentHistory = conversationHistory.slice(-10);
@@ -181,13 +189,69 @@ export async function POST(request: Request) {
       content: message,
     });
 
-    // Call Claude Sonnet
-    const response = await getAnthropic().messages.create({
+    // First call to Claude with the search_web tool available
+    let response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: systemPrompt,
+      tools: [WEB_SEARCH_TOOL],
       messages,
     });
+
+    // Handle tool use - Claude may want to search the web
+    while (response.stop_reason === 'tool_use') {
+      const toolUseBlock = response.content.find(
+        (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
+      );
+
+      if (!toolUseBlock || toolUseBlock.name !== 'search_web') {
+        break;
+      }
+
+      // Execute the web search
+      const searchQuery = (toolUseBlock.input as { query: string }).query;
+      console.log('Claude requested web search:', searchQuery);
+
+      let toolResult: string;
+      try {
+        const searchResult = await searchWeb(searchQuery, detectedLanguage);
+        if (searchResult) {
+          const now = new Date();
+          const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
+          toolResult = `Web search results (${dateStr}):\n\n${searchResult.results}\n\nSources: ${searchResult.sources.slice(0, 2).join(', ')}`;
+        } else {
+          toolResult = 'No results found for this search query.';
+        }
+      } catch (error) {
+        console.error('Web search failed:', error);
+        toolResult = 'Web search failed. Please answer based on your existing knowledge.';
+      }
+
+      // Continue the conversation with the tool result
+      messages.push({
+        role: 'assistant',
+        content: response.content,
+      });
+      messages.push({
+        role: 'user',
+        content: [
+          {
+            type: 'tool_result',
+            tool_use_id: toolUseBlock.id,
+            content: toolResult,
+          },
+        ],
+      });
+
+      // Call Claude again with the search results
+      response = await getAnthropic().messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: systemPrompt,
+        tools: [WEB_SEARCH_TOOL],
+        messages,
+      });
+    }
 
     // Extract text response
     const assistantResponse = response.content
