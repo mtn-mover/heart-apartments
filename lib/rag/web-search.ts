@@ -18,12 +18,13 @@ function getTavilyClient() {
 const REALTIME_KEYWORDS = [
   // Opening hours / availability
   'offen', 'geöffnet', 'öffnungszeiten', 'open', 'opening hours', 'closed', 'geschlossen',
-  'ouvert', 'fermé', 'horaires',
+  'ouvert', 'fermé', 'horaires', 'saison', 'season', 'betrieb',
   // Weather
   'wetter', 'weather', 'météo', 'regen', 'rain', 'schnee', 'snow', 'temperatur',
   // Transport / schedules
   'fahrplan', 'zug', 'bus', 'train', 'schedule', 'timetable', 'abfahrt', 'departure',
-  'horaire', 'prochain', 'nächster', 'next',
+  'horaire', 'prochain', 'nächster', 'next', 'wie komme ich', 'how to get', 'how do i get',
+  'comment aller', 'anreise', 'hinfahrt',
   // Events
   'event', 'veranstaltung', 'festival', 'konzert', 'concert', 'heute', 'today', 'morgen',
   'tomorrow', 'diese woche', 'this week', 'cette semaine', 'aktuell', 'current',
@@ -118,23 +119,16 @@ export async function searchWeb(query: string, language: string): Promise<WebSea
  * Build a context string from web search results
  */
 export function buildWebSearchContext(searchResult: WebSearchResult, language: string): string {
-  const intro = {
-    de: '## AKTUELLE INFORMATIONEN AUS DEM WEB',
-    en: '## CURRENT INFORMATION FROM THE WEB',
-    fr: '## INFORMATIONS ACTUELLES DU WEB',
-  };
-
-  const note = {
-    de: 'Hinweis: Diese Informationen wurden gerade aus dem Internet abgerufen und sind aktuell.',
-    en: 'Note: This information was just retrieved from the internet and is current.',
-    fr: 'Note: Ces informations viennent d\'être récupérées sur Internet et sont actuelles.',
-  };
-
   return `
-${intro[language as keyof typeof intro] || intro.en}
+## IMPORTANT: LIVE WEB SEARCH RESULTS - USE THIS INFORMATION!
+The following information was just retrieved from the internet and is CURRENT and ACCURATE.
+You MUST use this information to answer the user's question. Do NOT say "I don't know" or "check the website" when this information is provided.
+
+**Search Results:**
 ${searchResult.results}
 
-${note[language as keyof typeof note] || note.en}
-Sources: ${searchResult.sources.join(', ')}
+**Sources:** ${searchResult.sources.slice(0, 2).join(', ')}
+
+INSTRUCTION: Base your answer on the web search results above. Present the information clearly and helpfully.
 `;
 }
