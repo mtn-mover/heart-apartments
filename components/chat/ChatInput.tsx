@@ -25,6 +25,8 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
     if (message.trim() && !disabled) {
       onSend(message.trim());
       setMessage('');
+      // Keep focus on input after sending
+      textareaRef.current?.focus();
     }
   };
 
@@ -48,6 +50,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
           onKeyDown={handleKeyDown}
           placeholder={placeholder || 'Type a message...'}
           disabled={disabled}
+          autoFocus
           rows={1}
           className="
             flex-1 resize-none
