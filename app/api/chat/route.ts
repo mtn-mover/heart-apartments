@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@/lib/supabase';
 import { retrieveContext, shouldSuggestDiana } from '@/lib/rag/retrieval';
-import { buildSystemPrompt, getDianaContactMessage } from '@/lib/rag/prompts';
+import { buildSystemPrompt } from '@/lib/rag/prompts';
 import { needsWebSearch, searchWeb, buildWebSearchContext } from '@/lib/rag/web-search';
 import type { ChatRequest, ChatResponse } from '@/lib/rag/types';
 
@@ -195,13 +195,9 @@ export async function POST(request: Request) {
       .join('');
 
     // Check if we should suggest WhatsApp contact
+    // The bot already mentions Diana in its response, so we just show the button
     const suggestWhatsApp = shouldSuggestDiana(confidence, message, assistantResponse);
-
-    // If suggesting WhatsApp, append the contact message
-    let finalResponse = assistantResponse;
-    if (suggestWhatsApp) {
-      finalResponse += '\n\n' + getDianaContactMessage(detectedLanguage);
-    }
+    const finalResponse = assistantResponse;
 
     // Save messages to chat history
     if (currentSessionId) {
