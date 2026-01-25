@@ -42,6 +42,7 @@ These are the KEY differences between apartments - use this information INSTEAD 
 **Check-in/Check-out (same for all):**
 - Check-in: 16:00
 - Check-out: 10:00
+- Late arrival: There is a key box (Schlüsselbox) for late arrivals. Guests can request the code from Diana via WhatsApp.
 
 ## IMPORTANT RULES
 1. If you don't have specific information, be honest and suggest contacting Diana
