@@ -115,7 +115,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
           guestName: data.name,
           guestContact: data.contact,
           question: data.question,
-          // Only include a brief note, not the full conversation
           conversationSummary: undefined,
           language: conversationLanguage,
         }),
@@ -124,7 +123,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
       const result = await response.json();
 
       if (result.success) {
-        // Add confirmation message
         const confirmMessage: Message = {
           id: `confirm-${Date.now()}`,
           role: 'assistant',
@@ -132,11 +130,39 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, confirmMessage]);
+        setShowWhatsAppForm(false);
+      } else {
+        // Send failed - warn the guest!
+        const errorMessages: Record<string, string> = {
+          de: '⚠️ Die Nachricht konnte leider nicht gesendet werden. Bitte kontaktiere Diana direkt per WhatsApp: +41 79 300 33 28',
+          en: '⚠️ The message could not be sent. Please contact Diana directly via WhatsApp: +41 79 300 33 28',
+          fr: '⚠️ Le message n\'a pas pu être envoyé. Veuillez contacter Diana directement par WhatsApp: +41 79 300 33 28',
+        };
+        const errorMsg: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: errorMessages[conversationLanguage] || errorMessages.en,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+        setShowWhatsAppForm(false);
       }
-
-      setShowWhatsAppForm(false);
     } catch (error) {
       console.error('Error sending WhatsApp:', error);
+      // Network error - warn the guest!
+      const errorMessages: Record<string, string> = {
+        de: '⚠️ Die Nachricht konnte leider nicht gesendet werden. Bitte kontaktiere Diana direkt per WhatsApp: +41 79 300 33 28',
+        en: '⚠️ The message could not be sent. Please contact Diana directly via WhatsApp: +41 79 300 33 28',
+        fr: '⚠️ Le message n\'a pas pu être envoyé. Veuillez contacter Diana directement par WhatsApp: +41 79 300 33 28',
+      };
+      const errorMsg: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: errorMessages[conversationLanguage] || errorMessages.en,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+      setShowWhatsAppForm(false);
     }
   };
 

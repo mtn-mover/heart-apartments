@@ -5,8 +5,8 @@ let twilioClient: ReturnType<typeof Twilio> | null = null;
 
 function getTwilioClient() {
   if (!twilioClient) {
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+    const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
 
     if (!accountSid || !authToken) {
       throw new Error('Twilio environment variables are not set');
@@ -44,13 +44,23 @@ export async function sendWhatsAppToDiana(message: WhatsAppMessage): Promise<{ s
     return { success: false, error: 'WhatsApp numbers not configured' };
   }
 
+  // Ensure whatsapp: prefix for Twilio WhatsApp API
+  const fromNumber = twilioWhatsAppNumber.startsWith('whatsapp:')
+    ? twilioWhatsAppNumber.trim()
+    : `whatsapp:${twilioWhatsAppNumber.trim()}`;
+  const toNumber = dianaWhatsAppNumber.startsWith('whatsapp:')
+    ? dianaWhatsAppNumber.trim()
+    : `whatsapp:${dianaWhatsAppNumber.trim()}`;
+
+  console.log('Twilio sending:', { from: fromNumber, to: toNumber.substring(0, 20) + '...' });
+
   const formattedMessage = formatMessageForDiana(message);
 
   try {
     const result = await getTwilioClient().messages.create({
       body: formattedMessage,
-      from: twilioWhatsAppNumber,
-      to: dianaWhatsAppNumber,
+      from: fromNumber,
+      to: toNumber,
     });
     console.log('Twilio message sent:', result.sid);
     return { success: true };
