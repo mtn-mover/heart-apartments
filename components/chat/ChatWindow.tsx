@@ -8,7 +8,7 @@ import QuickActions from './QuickActions';
 import { getWelcomeMessage } from '@/lib/rag/prompts';
 import type { Message, ChatResponse } from '@/lib/rag/types';
 
-const DIANA_PHONE = '41793003328';
+const DIANA_PHONE = '41793028219';
 
 interface ChatWindowProps {
   onClose: () => void;
