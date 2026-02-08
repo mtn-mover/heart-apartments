@@ -5,9 +5,10 @@ import { useLocale } from 'next-intl';
 import ChatMessage from './ChatMessage';
 import ChatInput, { type ChatInputRef } from './ChatInput';
 import QuickActions from './QuickActions';
-import WhatsAppForm from './WhatsAppForm';
 import { getWelcomeMessage } from '@/lib/rag/prompts';
 import type { Message, ChatResponse } from '@/lib/rag/types';
+
+const DIANA_PHONE = '41793003328';
 
 interface ChatWindowProps {
   onClose: () => void;
@@ -18,7 +19,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [showWhatsAppForm, setShowWhatsAppForm] = useState(false);
   const [lastQuestion, setLastQuestion] = useState('');
   const [conversationLanguage, setConversationLanguage] = useState(locale);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -106,64 +106,17 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
     }
   };
 
-  const handleWhatsAppSubmit = async (data: { name: string; contact: string; question: string }) => {
-    try {
-      const response = await fetch('/api/whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          guestName: data.name,
-          guestContact: data.contact,
-          question: data.question,
-          conversationSummary: undefined,
-          language: conversationLanguage,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        const confirmMessage: Message = {
-          id: `confirm-${Date.now()}`,
-          role: 'assistant',
-          content: result.message,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, confirmMessage]);
-        setShowWhatsAppForm(false);
-      } else {
-        // Send failed - warn the guest!
-        const errorMessages: Record<string, string> = {
-          de: '⚠️ Die Nachricht konnte leider nicht gesendet werden. Bitte kontaktiere Diana direkt per WhatsApp: +41 79 300 33 28',
-          en: '⚠️ The message could not be sent. Please contact Diana directly via WhatsApp: +41 79 300 33 28',
-          fr: '⚠️ Le message n\'a pas pu être envoyé. Veuillez contacter Diana directement par WhatsApp: +41 79 300 33 28',
-        };
-        const errorMsg: Message = {
-          id: `error-${Date.now()}`,
-          role: 'assistant',
-          content: errorMessages[conversationLanguage] || errorMessages.en,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMsg]);
-        setShowWhatsAppForm(false);
-      }
-    } catch (error) {
-      console.error('Error sending WhatsApp:', error);
-      // Network error - warn the guest!
-      const errorMessages: Record<string, string> = {
-        de: '⚠️ Die Nachricht konnte leider nicht gesendet werden. Bitte kontaktiere Diana direkt per WhatsApp: +41 79 300 33 28',
-        en: '⚠️ The message could not be sent. Please contact Diana directly via WhatsApp: +41 79 300 33 28',
-        fr: '⚠️ Le message n\'a pas pu être envoyé. Veuillez contacter Diana directement par WhatsApp: +41 79 300 33 28',
-      };
-      const errorMsg: Message = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: errorMessages[conversationLanguage] || errorMessages.en,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-      setShowWhatsAppForm(false);
-    }
+  const openWhatsApp = () => {
+    const greetings: Record<string, string> = {
+      de: 'Hallo Diana, ich chatte gerade mit dem Chatbot auf der Little Heart Webseite und bräuchte deine Hilfe',
+      en: 'Hello Diana, I\'m chatting with the chatbot on the Little Heart website and need your help',
+      fr: 'Bonjour Diana, je suis en train de chatter avec le chatbot du site Little Heart et j\'aurais besoin de votre aide',
+    };
+    const greeting = greetings[conversationLanguage] || greetings.en;
+    const text = lastQuestion
+      ? `${greeting}: ${lastQuestion}`
+      : greeting;
+    window.open(`https://wa.me/${DIANA_PHONE}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const inputPlaceholder = locale === 'de'
@@ -225,7 +178,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
             {message.showWhatsApp && (
               <div className="mt-2 ml-2">
                 <button
-                  onClick={() => setShowWhatsAppForm(true)}
+                  onClick={openWhatsApp}
                   className="
                     inline-flex items-center gap-2
                     px-4 py-2
@@ -266,28 +219,16 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* WhatsApp Form or Quick Actions + Input */}
-      {showWhatsAppForm ? (
-        <WhatsAppForm
-          onSubmit={handleWhatsAppSubmit}
-          onCancel={() => setShowWhatsAppForm(false)}
-          locale={locale}
-          prefillQuestion={lastQuestion}
-        />
-      ) : (
-        <>
-          {/* Show quick actions only at start */}
-          {messages.length <= 1 && (
-            <QuickActions onSelect={sendMessage} locale={locale} />
-          )}
-          <ChatInput
-            ref={chatInputRef}
-            onSend={sendMessage}
-            disabled={isLoading}
-            placeholder={inputPlaceholder}
-          />
-        </>
+      {/* Quick Actions + Input */}
+      {messages.length <= 1 && (
+        <QuickActions onSelect={sendMessage} locale={locale} />
       )}
+      <ChatInput
+        ref={chatInputRef}
+        onSend={sendMessage}
+        disabled={isLoading}
+        placeholder={inputPlaceholder}
+      />
     </div>
   );
 }
