@@ -282,9 +282,9 @@ export async function POST(request: Request) {
       .map((block) => block.text)
       .join('');
 
-    // Check if we should suggest WhatsApp contact
+    // Check if we should suggest contacting Diana
     // The bot already mentions Diana in its response, so we just show the button
-    const suggestWhatsApp = shouldSuggestDiana(confidence, message, assistantResponse);
+    const suggestContactButton = shouldSuggestDiana(confidence, message, assistantResponse);
     const finalResponse = assistantResponse;
 
     // Save messages to chat history
@@ -308,7 +308,7 @@ export async function POST(request: Request) {
       response: finalResponse,
       sessionId: currentSessionId || '',
       confidence,
-      suggestWhatsApp,
+      suggestContactButton,
       detectedLanguage,
     };
 

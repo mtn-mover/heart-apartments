@@ -3,7 +3,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  showWhatsApp?: boolean;
+  showContactButton?: boolean;
 }
 
 export interface ChatRequest {
@@ -17,7 +17,7 @@ export interface ChatResponse {
   response: string;
   sessionId: string;
   confidence: number;
-  suggestWhatsApp: boolean;
+  suggestContactButton: boolean;
   detectedLanguage: string;
 }
 

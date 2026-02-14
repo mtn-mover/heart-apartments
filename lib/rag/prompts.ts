@@ -147,15 +147,16 @@ Wenn der Gast nach Wetter, Öffnungszeiten oder aktuellen Infos fragt → BENUTZ
 ═══════════════════════════════════════════════════════════════
 ## ⛔ VERBOTEN
 ═══════════════════════════════════════════════════════════════
-- KEINE Telefonnummern/WhatsApp-Nummern (Chat hat Button)
+- KEINE Telefonnummern/WhatsApp-Nummern - Gäste sollen Diana über den Airbnb-Messenger kontaktieren (Chat hat Button)
 - KEINE erfundenen Informationen
 - KEIN Erwähnen vom Broschüren-Regal bei allgemeinen Ausflugsfragen
 
 ═══════════════════════════════════════════════════════════════
 ## ALLGEMEINE INFOS (für alle Apartments gleich)
 ═══════════════════════════════════════════════════════════════
-**Check-in:** 16:00 | **Check-out:** 10:00
-**Späte Ankunft:** Schlüsselbox vorhanden, Code bei Diana anfragen
+**Check-in:** 16:00 (Self Check-in) | **Check-out:** 10:00 (Self Check-out)
+**Schlüsselbox:** Code kommt automatisch über Airbnb vor Ankunft
+**Diana:** Regelmässig im Haus – es ist gut möglich, dass ihr euch trefft!
 
 ═══════════════════════════════════════════════════════════════
 ## WISSEN AUS DER DATENBANK (WICHTIG!)
@@ -170,7 +171,7 @@ ${contextText || 'Keine spezifischen Dokumente gefunden.'}
 ═══════════════════════════════════════════════════════════════
 - Superhost seit 2016, 1400+ Gäste
 - Sprachen: Deutsch, Englisch, Französisch
-- Antwortet meist innerhalb 1 Stunde
+- Erreichbar über Airbnb-Messenger: 08:00–22:00
 
 Sei freundlich, hilfsbereit und KURZ. Gäste wollen schnelle Antworten!`;
 }
@@ -218,15 +219,15 @@ export function getDianaContactMessage(language: string): string {
   const messages: Record<string, string> = {
     de: `Für diese Anfrage ist es am besten, Diana direkt zu kontaktieren.
 
-Du kannst ihr eine WhatsApp-Nachricht senden - sie antwortet normalerweise innerhalb einer Stunde! 💬`,
+Schreib ihr über den Airbnb-Messenger – sie ist täglich von 08:00 bis 22:00 erreichbar! 💬`,
 
     en: `For this request, it's best to contact Diana directly.
 
-You can send her a WhatsApp message - she usually responds within an hour! 💬`,
+Send her a message via Airbnb Messenger – she's available daily from 08:00 to 22:00! 💬`,
 
     fr: `Pour cette demande, il est préférable de contacter Diana directement.
 
-Vous pouvez lui envoyer un message WhatsApp - elle répond généralement dans l'heure! 💬`,
+Envoyez-lui un message via Airbnb Messenger – elle est disponible tous les jours de 08:00 à 22:00! 💬`,
   };
 
   return messages[language] || messages.en;

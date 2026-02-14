@@ -147,6 +147,6 @@ export function shouldSuggestDiana(
     return true;
   }
 
-  // Default: bot handled it, no WhatsApp needed
+  // Default: bot handled it, no contact needed
   return false;
 }

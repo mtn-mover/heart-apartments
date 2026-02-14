@@ -8,7 +8,13 @@ import QuickActions from './QuickActions';
 import { getWelcomeMessage } from '@/lib/rag/prompts';
 import type { Message, ChatResponse } from '@/lib/rag/types';
 
-const DIANA_PHONE = '41793028219';
+const AIRBNB_PROFILE_URL = 'https://www.airbnb.com/users/profile/1467093717922747835';
+
+const APARTMENTS = ['HEART1', 'HEART2', 'HEART3', 'HEART4', 'HEART5'] as const;
+
+function isApartmentQuestion(content: string): boolean {
+  return /heart[1-5]/i.test(content) && /welch|which|quel/i.test(content);
+}
 
 interface ChatWindowProps {
   onClose: () => void;
@@ -19,8 +25,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [lastQuestion, setLastQuestion] = useState('');
-  const [conversationLanguage, setConversationLanguage] = useState(locale);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<ChatInputRef>(null);
 
@@ -50,8 +54,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
-    setLastQuestion(content);
-
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -74,17 +76,13 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
       if (data.sessionId) {
         setSessionId(data.sessionId);
       }
-      if (data.detectedLanguage) {
-        setConversationLanguage(data.detectedLanguage);
-      }
-
       // Add assistant message
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         content: data.response,
         timestamp: new Date(),
-        showWhatsApp: data.suggestWhatsApp,
+        showContactButton: data.suggestContactButton,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
@@ -106,17 +104,8 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
     }
   };
 
-  const openWhatsApp = () => {
-    const greetings: Record<string, string> = {
-      de: 'Hallo Diana, ich chatte gerade mit dem Chatbot auf der Little Heart Webseite und bräuchte deine Hilfe',
-      en: 'Hello Diana, I\'m chatting with the chatbot on the Little Heart website and need your help',
-      fr: 'Bonjour Diana, je suis en train de chatter avec le chatbot du site Little Heart et j\'aurais besoin de votre aide',
-    };
-    const greeting = greetings[conversationLanguage] || greetings.en;
-    const text = lastQuestion
-      ? `${greeting}: ${lastQuestion}`
-      : greeting;
-    window.open(`https://wa.me/${DIANA_PHONE}?text=${encodeURIComponent(text)}`, '_blank');
+  const openAirbnbMessenger = () => {
+    window.open(AIRBNB_PROFILE_URL, '_blank');
   };
 
   const inputPlaceholder = locale === 'de'
@@ -172,17 +161,39 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div key={message.id}>
             <ChatMessage message={message} />
-            {message.showWhatsApp && (
+            {message.role === 'assistant' && isApartmentQuestion(message.content) && index === messages.length - 1 && (
+              <div className="mt-2 ml-2 flex flex-wrap gap-1.5">
+                {APARTMENTS.map((apt) => (
+                  <button
+                    key={apt}
+                    onClick={() => sendMessage(apt)}
+                    disabled={isLoading}
+                    className="
+                      px-3 py-1.5
+                      bg-white hover:bg-gray-100
+                      border border-gray-200
+                      rounded-full
+                      text-xs text-gray-700 font-medium
+                      transition-colors duration-200
+                      disabled:opacity-50
+                    "
+                  >
+                    🏠 {apt}
+                  </button>
+                ))}
+              </div>
+            )}
+            {message.showContactButton && (
               <div className="mt-2 ml-2">
                 <button
-                  onClick={openWhatsApp}
+                  onClick={openAirbnbMessenger}
                   className="
                     inline-flex items-center gap-2
                     px-4 py-2
-                    bg-green-500 hover:bg-green-600
+                    bg-[#FF5A5F] hover:bg-[#E04E53]
                     rounded-full
                     text-sm text-white font-medium
                     transition-colors duration-200
@@ -191,13 +202,18 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
                     className="w-4 h-4"
                   >
-                    <path d="M12 2C6.48 2 2 6.48 2 12c0 1.77.46 3.43 1.27 4.88L2 22l5.23-1.37C8.69 21.53 10.31 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  {locale === 'de' ? 'Diana kontaktieren' : 'Contact Diana'}
+                  {locale === 'de' ? 'Diana über Airbnb kontaktieren' : locale === 'fr' ? 'Contacter Diana sur Airbnb' : 'Contact Diana on Airbnb'}
                 </button>
+                <p className="mt-1 ml-1 text-xs text-gray-400">
+                  {locale === 'de' ? 'Erreichbar 08:00–22:00' : locale === 'fr' ? 'Disponible 08:00–22:00' : 'Available 08:00–22:00'}
+                </p>
               </div>
             )}
           </div>
