@@ -29,53 +29,59 @@ function HomePageContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center bg-heart-charcoal-900">
-        {/* Background Image - Full height visible */}
-        <div className="relative w-full">
-          <Image
-            src="/hero_little_heard.png"
-            alt="Little Heart Guesthouse - Interlaken"
-            width={1920}
-            height={1080}
-            priority
-            quality={90}
-            className="w-full h-auto"
-          />
+      <section className="relative min-h-[80vh] md:min-h-0 bg-heart-charcoal-900">
+        {/* Background Image */}
+        <Image
+          src="/hero_little_heard.png"
+          alt="Little Heart Guesthouse - Interlaken"
+          fill
+          priority
+          quality={90}
+          className="object-cover md:hidden"
+        />
+        <Image
+          src="/hero_little_heard.png"
+          alt="Little Heart Guesthouse - Interlaken"
+          width={1920}
+          height={1080}
+          priority
+          quality={90}
+          className="hidden md:block w-full h-auto"
+        />
 
-          {/* Gradient Overlay - Full width at bottom */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-heart-charcoal-900/70 via-heart-charcoal-900/50 to-transparent pointer-events-none" />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-heart-charcoal-900/80 via-heart-charcoal-900/40 to-transparent pointer-events-none" />
 
-          {/* Hero Content - Positioned over image, lower position */}
-          <div className="absolute inset-0 flex items-end">
-            <div className="w-full pt-16 pb-4">
-              <div className="text-center px-4 max-w-5xl mx-auto">
-                {/* Main Heading */}
-                <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-                  {t('heroTitle')}
-                </h1>
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex items-end">
+          <div className="w-full pb-8 md:pb-4">
+            <div className="text-center px-4 max-w-5xl mx-auto">
+              {/* Main Heading */}
+              <h1 className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 tracking-tight">
+                {t('heroTitle')}
+              </h1>
 
-                {/* Tagline */}
-                <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-12 font-light max-w-3xl mx-auto">
-                  {t('heroSubtitle')}
-                </p>
+              {/* Tagline */}
+              <p className="text-lg md:text-2xl lg:text-3xl text-white/90 mb-8 md:mb-12 font-light max-w-3xl mx-auto">
+                {t('heroSubtitle')}
+              </p>
 
-                {/* CTA Button */}
-                <Link
-                  href="/apartments"
-                  className="inline-flex items-center px-10 py-4 bg-heart-coral-500 hover:bg-heart-coral-600 text-white font-medium text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-                >
-                  {t('heroCta')}
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
+              {/* CTA Button */}
+              <Link
+                href="/apartments"
+                className="inline-flex items-center px-8 md:px-10 py-3 md:py-4 bg-heart-coral-500 hover:bg-heart-coral-600 text-white font-medium text-base md:text-lg rounded-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+              >
+                {t('heroCta')}
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
 
-                {/* Scroll Indicator */}
-                <div className="mt-8 animate-bounce">
-                  <svg className="w-6 h-6 text-white/70 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
+              {/* Scroll Indicator */}
+              <div className="mt-6 md:mt-8 animate-bounce">
+                <svg className="w-6 h-6 text-white/70 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
               </div>
             </div>
           </div>
