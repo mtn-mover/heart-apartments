@@ -78,8 +78,6 @@ function MapContent() {
           <Marker key={loc.name} position={[loc.lat, loc.lng]} icon={icon}>
             <Popup>
               <strong>{loc.name}</strong>
-              <br />
-              {loc.address}
             </Popup>
           </Marker>
         ))}
