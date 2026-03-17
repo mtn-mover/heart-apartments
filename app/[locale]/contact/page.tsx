@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { apartments } from '@/data/apartments';
+import ObfuscatedEmail from '@/components/ObfuscatedEmail';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -45,12 +46,11 @@ function ContactPageContent() {
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('email')}</h3>
-              <a
-                href="mailto:info@opalheartguesthouse.com"
+              <ObfuscatedEmail
+                user="info"
+                domain="heartbox-interlaken.ch"
                 className="text-opal-blue hover:text-opal-teal font-medium transition-colors"
-              >
-                info@opalheartguesthouse.com
-              </a>
+              />
             </div>
 
             {/* Address */}
