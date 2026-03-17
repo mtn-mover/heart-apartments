@@ -75,7 +75,7 @@ function AboutPageContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-heart-coral-400 to-heart-coral-600 rounded-2xl transform rotate-3"></div>
                 <div className="relative bg-heart-cream-100 rounded-2xl overflow-hidden aspect-square shadow-xl">
                   <Image
-                    src="/images/IMG_2802.jpeg"
+                    src="/images/diana.jpg"
                     alt="Diana - Your Host at Little Heart Guesthouse"
                     fill
                     className="object-cover"

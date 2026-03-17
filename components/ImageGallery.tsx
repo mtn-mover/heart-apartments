@@ -126,7 +126,8 @@ export default function ImageGallery({ images, apartmentName }: ImageGalleryProp
               fill
               sizes="(max-width: 1024px) 100vw, 66vw"
               className="object-cover"
-              priority
+              priority={selectedIndex === 0}
+              loading={selectedIndex === 0 ? 'eager' : 'lazy'}
             />
             <div className="absolute inset-0 bg-black/0 group-hover/main:bg-black/10 transition-colors flex items-center justify-center">
               <span className="opacity-0 group-hover/main:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
@@ -204,6 +205,7 @@ export default function ImageGallery({ images, apartmentName }: ImageGalleryProp
                   fill
                   sizes="100px"
                   className="object-cover"
+                  loading="lazy"
                 />
               </button>
             ))}
@@ -311,6 +313,7 @@ export default function ImageGallery({ images, apartmentName }: ImageGalleryProp
                   fill
                   sizes="64px"
                   className="object-cover"
+                  loading="lazy"
                 />
               </button>
             ))}
