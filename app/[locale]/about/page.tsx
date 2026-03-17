@@ -73,12 +73,13 @@ function AboutPageContent() {
             <div className="order-2 lg:order-1">
               <div className="relative aspect-square max-w-md mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-heart-coral-400 to-heart-coral-600 rounded-2xl transform rotate-3"></div>
-                <div className="relative bg-heart-cream-100 rounded-2xl overflow-hidden aspect-square flex items-center justify-center shadow-xl">
-                  {/* Placeholder for Diana's photo */}
-                  <div className="text-center p-8">
-                    <span className="text-8xl mb-4 block">👩</span>
-                    <p className="text-heart-charcoal-500 text-sm">Diana's Photo</p>
-                  </div>
+                <div className="relative bg-heart-cream-100 rounded-2xl overflow-hidden aspect-square shadow-xl">
+                  <Image
+                    src="/images/IMG_2802.jpeg"
+                    alt="Diana - Your Host at Little Heart Guesthouse"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               </div>
             </div>
