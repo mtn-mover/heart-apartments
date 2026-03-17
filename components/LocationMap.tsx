@@ -6,14 +6,14 @@ const locations = [
   {
     name: 'HEART 1–4',
     address: 'Centralstrasse 4, 3800 Interlaken',
-    lat: 46.6863,
-    lng: 7.8586,
+    lat: 46.6844165,
+    lng: 7.8553099,
   },
   {
     name: 'HEART 5',
-    address: 'Generalguisanstrasse 16, 3800 Interlaken',
-    lat: 46.6830,
-    lng: 7.8490,
+    address: 'General-Guisan-Strasse 16, 3800 Interlaken',
+    lat: 46.6825525,
+    lng: 7.8549234,
   },
 ];
 
