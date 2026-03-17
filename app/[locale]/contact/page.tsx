@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { apartments } from '@/data/apartments';
 import ObfuscatedEmail from '@/components/ObfuscatedEmail';
+import LocationMap from '@/components/LocationMap';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -37,7 +38,7 @@ function ContactPageContent() {
       {/* Contact Info */}
       <section className="py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="max-w-md mx-auto">
             {/* Email */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
               <div className="w-16 h-16 bg-opal-pearl rounded-full flex items-center justify-center mx-auto mb-4">
@@ -51,18 +52,6 @@ function ContactPageContent() {
                 domain="heartbox-interlaken.ch"
                 className="text-opal-blue hover:text-opal-teal font-medium transition-colors"
               />
-            </div>
-
-            {/* Address */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
-              <div className="w-16 h-16 bg-opal-pearl rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-opal-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('address')}</h3>
-              <p className="text-slate-600">{t('addressText')}</p>
             </div>
           </div>
 
@@ -89,20 +78,14 @@ function ContactPageContent() {
         </div>
       </section>
 
-      {/* Map Section Placeholder */}
+      {/* Map Section */}
       <section className="py-16 md:py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2 font-heading">Find Us in Interlaken</h2>
-            <p className="text-slate-600">Central location, easy access to train stations and attractions</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2 font-heading">{t('mapTitle')}</h2>
+            <p className="text-slate-600">{t('mapSubtitle')}</p>
           </div>
-          <div className="bg-slate-200 rounded-2xl h-80 flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-4xl mb-4 block">📍</span>
-              <p className="text-slate-700 font-medium">Interlaken, Switzerland</p>
-              <p className="text-slate-500 text-sm mt-2">200m from Interlaken West Station</p>
-            </div>
-          </div>
+          <LocationMap />
         </div>
       </section>
 
