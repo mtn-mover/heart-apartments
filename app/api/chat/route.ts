@@ -207,9 +207,17 @@ export async function POST(request: Request) {
       // Events / activities
       'event', 'veranstaltung', 'événement', 'fahrplan', 'schedule', 'horaire',
       'zug', 'train', 'bus', 'schiff', 'boat', 'seilbahn', 'cable car',
-      // Attractions (always check availability)
-      'jungfrau', 'schynige', 'harder', 'first', 'grindelwald', 'lauterbrunnen',
-      'paragliding', 'gleitschirm',
+      // Intent to visit (triggers search for availability)
+      'will auf', 'möchte auf', 'will nach', 'möchte nach', 'gehen nach',
+      'fahren nach', 'besuchen', 'besichtigen', 'ausflug', 'excursion',
+      'wandern', 'hike', 'hiking', 'randonnée',
+      // Attractions (always check availability) - including common misspellings
+      'jungfrau', 'jungfraujoch', 'schynige', 'shynige', 'harder', 'hardergrat',
+      'first', 'grindelwald', 'lauterbrunnen', 'mürren', 'murren', 'wengen',
+      'brienz', 'thun', 'niesen', 'niederhorn', 'stockhorn', 'beatenberg',
+      'st\\.? beatus', 'beatushöhle', 'trümmelbach', 'truemmelbach',
+      'paragliding', 'gleitschirm', 'skywalk', 'skywings',
+      'platte', 'kulm', 'joch',
     ].join('|'), 'i').test(lowerMessage);
 
     const toolChoiceConfig = needsWebSearch
