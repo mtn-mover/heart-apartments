@@ -11,9 +11,9 @@ const locations = [
   },
   {
     name: 'HEART 5',
-    address: 'General-Guisan-Strasse 16, 3800 Interlaken',
-    lat: 46.6825525,
-    lng: 7.8549234,
+    address: 'General-Guisan-Strasse 18, 3800 Interlaken',
+    lat: 46.6824098,
+    lng: 7.8549120,
   },
 ];
 
