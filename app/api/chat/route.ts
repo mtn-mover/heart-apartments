@@ -227,7 +227,7 @@ export async function POST(request: Request) {
     // First call to Claude with the search_web tool available
     // For queries that clearly need real-time info, require tool use
     let response = await getAnthropic().messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
       max_tokens: 1024,
       system: systemPrompt,
       tools: [WEB_SEARCH_TOOL],
@@ -276,7 +276,7 @@ export async function POST(request: Request) {
 
       // Call Claude again with the search results
       response = await getAnthropic().messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-5',
         max_tokens: 1024,
         system: systemPrompt,
         tools: [WEB_SEARCH_TOOL],

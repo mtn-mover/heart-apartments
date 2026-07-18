@@ -107,7 +107,7 @@ async function testChat(testCase: TestCase): Promise<void> {
 
     // Call Claude
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
       max_tokens: 500,
       system: systemPrompt,
       messages: [{ role: 'user', content: testCase.message }],
