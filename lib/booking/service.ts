@@ -1,11 +1,10 @@
 /**
  * Shared server-side helpers for the booking API routes.
- * Everything here runs with the Supabase service role — never import from
- * client components.
+ * Everything here talks to Neon via lib/db — never import from client
+ * components (DATABASE_URL is server-only).
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
-import { createServerClient, PropertyConfig } from '../supabase';
+import { getSql, PropertyConfig } from '../db';
 import { apartments } from '@/data/apartments';
 
 export const PENDING_TTL_MINUTES = 30;
@@ -14,21 +13,10 @@ export function isMockMode(): boolean {
   return process.env.SMOOBU_MOCK === '1' || !process.env.SMOOBU_API_KEY;
 }
 
-export function getAdmin(): SupabaseClient {
-  return createServerClient();
-}
-
-export async function loadPropertyConfig(
-  supabase: SupabaseClient,
-  apartmentId: string
-): Promise<PropertyConfig | null> {
-  const { data, error } = await supabase
-    .from('property_config')
-    .select('*')
-    .eq('id', apartmentId)
-    .maybeSingle();
-  if (error) throw new Error(`property_config load failed: ${error.message}`);
-  return (data as PropertyConfig) ?? null;
+export async function loadPropertyConfig(apartmentId: string): Promise<PropertyConfig | null> {
+  const sql = getSql();
+  const rows = await sql`select * from property_config where id = ${apartmentId}`;
+  return (rows[0] as PropertyConfig | undefined) ?? null;
 }
 
 /**
@@ -50,13 +38,12 @@ export function resolveSmoobuPropertyId(cfg: PropertyConfig): number | null {
  * Smoobu), so expiring them lazily right before an insert is sufficient —
  * no cron needed.
  */
-export async function expireStalePendings(supabase: SupabaseClient): Promise<void> {
-  const { error } = await supabase
-    .from('bookings')
-    .update({ status: 'expired' })
-    .eq('status', 'pending_payment')
-    .lt('expires_at', new Date().toISOString());
-  if (error) throw new Error(`expiring stale pendings failed: ${error.message}`);
+export async function expireStalePendings(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    update bookings set status = 'expired'
+    where status = 'pending_payment' and expires_at < now()
+  `;
 }
 
 export function jsonError(status: number, error: string, detail?: unknown): Response {

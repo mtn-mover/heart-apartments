@@ -5,7 +5,7 @@
  * Run: npx tsx scripts/reset-test-bookings.ts --yes
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
@@ -16,21 +16,12 @@ if (!process.argv.includes('--yes')) {
   process.exit(1);
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.SUPABASE_SERVICE_KEY ?? ''
-);
+const sql = neon(process.env.DATABASE_URL ?? '');
 
 async function main() {
-  const { count: b } = await supabase
-    .from('bookings')
-    .delete({ count: 'exact' })
-    .not('id', 'is', null);
-  const { count: w } = await supabase
-    .from('webhook_events')
-    .delete({ count: 'exact' })
-    .not('id', 'is', null);
-  console.log(`🧹 deleted ${b ?? 0} bookings, ${w ?? 0} webhook events`);
+  const b = await sql`delete from bookings returning id`;
+  const w = await sql`delete from webhook_events returning id`;
+  console.log(`🧹 deleted ${b.length} bookings, ${w.length} webhook events`);
 }
 
 main().catch(console.error);

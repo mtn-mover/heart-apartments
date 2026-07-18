@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import { NextRequest } from 'next/server';
-import { getAdmin, jsonError } from '@/lib/booking/service';
+import { jsonError } from '@/lib/booking/service';
 import { sendEmail } from '@/lib/email/resend';
 import { hostCancellationEmail } from '@/lib/email/templates';
-import type { BookingRow } from '@/lib/supabase';
+import { getSql, pgErrorCode } from '@/lib/db';
+import type { BookingRow } from '@/lib/db';
 
 /**
  * Smoobu webhook (configured as https://<site>/api/booking/webhooks/smoobu?token=…).
@@ -32,30 +33,29 @@ export async function POST(req: NextRequest) {
 
   const action = String(body.action ?? 'unknown');
   const reservationId = Number(body.data?.id ?? 0);
-  const supabase = getAdmin();
+  const sql = getSql();
 
   // Dedup identical deliveries (Smoobu retries on non-2xx).
   const eventId =
     'smoobu-' + createHash('sha256').update(JSON.stringify(body)).digest('hex').slice(0, 40);
-  const { error: dedupError } = await supabase
-    .from('webhook_events')
-    .insert({ id: eventId, source: 'smoobu', type: action, payload: body });
-  if (dedupError) {
-    if (dedupError.code === '23505') return Response.json({ received: true, duplicate: true });
-    console.error('[smoobu-webhook] dedup insert failed:', dedupError);
+  try {
+    await sql`
+      insert into webhook_events (id, source, type, payload)
+      values (${eventId}, 'smoobu', ${action}, ${JSON.stringify(body)}::jsonb)
+    `;
+  } catch (err) {
+    if (pgErrorCode(err) === '23505') return Response.json({ received: true, duplicate: true });
+    console.error('[smoobu-webhook] dedup insert failed:', err);
     return Response.json({ received: true }); // never trigger retry storms
   }
 
   if (action === 'cancelReservation' && reservationId > 0) {
-    const { data } = await supabase
-      .from('bookings')
-      .update({ status: 'cancelled' })
-      .eq('smoobu_reservation_id', reservationId)
-      .eq('status', 'confirmed')
-      .select()
-      .maybeSingle();
-
-    const booking = data as BookingRow | null;
+    const rows = await sql`
+      update bookings set status = 'cancelled'
+      where smoobu_reservation_id = ${reservationId} and status = 'confirmed'
+      returning *
+    `;
+    const booking = (rows[0] as BookingRow | undefined) ?? null;
     if (booking) {
       console.log(`[smoobu-webhook] booking ${booking.reference} cancelled via Smoobu`);
       const notify = process.env.BOOKING_NOTIFY_EMAIL;

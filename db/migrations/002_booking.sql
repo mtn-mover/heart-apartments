@@ -1,9 +1,9 @@
 -- Direct booking: property_config, bookings, webhook_events
--- Apply via Supabase Dashboard → SQL Editor (DDL is not possible through the JS client).
+-- Applied by scripts/db-migrate.ts (psql over DATABASE_URL_UNPOOLED). Idempotent.
 -- Verify afterwards with: npx tsx scripts/check-booking-schema.ts
 
 -- Needed for the gist exclusion constraint on (text =, daterange &&)
-create extension if not exists btree_gist with schema extensions;
+create extension if not exists btree_gist;
 
 -- Per-property booking configuration. Content (texts, images, specs) stays in
 -- data/apartments.ts; this table only holds what direct booking needs.
@@ -86,8 +86,5 @@ create trigger trg_bookings_updated_at
   before update on bookings
   for each row execute function set_updated_at();
 
--- RLS on, deliberately NO policies: these tables hold PII and payment references.
--- Only the service-role client (createServerClient) may touch them; anon gets nothing.
-alter table property_config enable row level security;
-alter table bookings enable row level security;
-alter table webhook_events enable row level security;
+-- (No RLS here: on Neon the only role is the server-side owner; access
+-- control is "DATABASE_URL stays server-only".)

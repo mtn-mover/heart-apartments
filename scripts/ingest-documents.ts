@@ -2,12 +2,12 @@
  * Document Ingestion Script
  *
  * This script extracts content from Word documents in the Bot_Info folder,
- * creates embeddings using OpenAI, and stores them in Supabase for RAG.
+ * creates embeddings using OpenAI, and stores them in Neon Postgres for RAG.
  *
  * Usage: npx tsx scripts/ingest-documents.ts
  *
  * Prerequisites:
- * - Supabase project with pgvector enabled
+ * - Neon database with pgvector (db/migrations/001_chatbot.sql applied)
  * - Environment variables set in .env.local
  */
 
@@ -16,7 +16,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import mammoth from 'mammoth';
 import OpenAI from 'openai';
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 
 // Load environment variables from .env.local
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
@@ -26,10 +26,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+const sql = neon(process.env.DATABASE_URL!);
 
 interface DocumentChunk {
   content: string;
@@ -115,17 +112,15 @@ async function ingestDocument(filePath: string): Promise<void> {
   for (const chunk of chunks) {
     const embedding = await createEmbedding(chunk.content);
 
-    const { error } = await supabase.from('documents').insert({
-      content: chunk.content,
-      source: chunk.source,
-      metadata: chunk.metadata,
-      embedding,
-    });
-
-    if (error) {
-      console.error(`  Error inserting chunk ${chunk.chunkIndex}:`, error.message);
-    } else {
+    try {
+      await sql`
+        insert into documents (content, source, metadata, embedding)
+        values (${chunk.content}, ${chunk.source}, ${JSON.stringify(chunk.metadata)}::jsonb,
+                ${JSON.stringify(embedding)}::vector)
+      `;
       console.log(`  Inserted chunk ${chunk.chunkIndex}`);
+    } catch (error) {
+      console.error(`  Error inserting chunk ${chunk.chunkIndex}:`, error);
     }
 
     // Rate limiting
@@ -169,17 +164,16 @@ Ideal für: ${apt.de.idealFor}
 
     const embedding = await createEmbedding(content);
 
-    const { error } = await supabase.from('documents').insert({
-      content,
-      source: `apartments/${apt.id}`,
-      metadata: { type: 'apartment', apartmentId: apt.id },
-      embedding,
-    });
-
-    if (error) {
-      console.error(`  Error inserting ${apt.id}:`, error.message);
-    } else {
+    try {
+      await sql`
+        insert into documents (content, source, metadata, embedding)
+        values (${content}, ${`apartments/${apt.id}`},
+                ${JSON.stringify({ type: 'apartment', apartmentId: apt.id })}::jsonb,
+                ${JSON.stringify(embedding)}::vector)
+      `;
       console.log(`  Inserted: ${apt.id}`);
+    } catch (error) {
+      console.error(`  Error inserting ${apt.id}:`, error);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -189,11 +183,11 @@ Ideal für: ${apt.de.idealFor}
 // Clear existing documents (optional)
 async function clearDocuments(): Promise<void> {
   console.log('Clearing existing documents...');
-  const { error } = await supabase.from('documents').delete().neq('id', 0);
-  if (error) {
-    console.error('Error clearing documents:', error.message);
-  } else {
+  try {
+    await sql`delete from documents`;
     console.log('Documents cleared.');
+  } catch (error) {
+    console.error('Error clearing documents:', error);
   }
 }
 
@@ -206,12 +200,8 @@ async function main(): Promise<void> {
     console.error('Error: OPENAI_API_KEY is not set');
     process.exit(1);
   }
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    console.error('Error: NEXT_PUBLIC_SUPABASE_URL is not set');
-    process.exit(1);
-  }
-  if (!process.env.SUPABASE_SERVICE_KEY) {
-    console.error('Error: SUPABASE_SERVICE_KEY is not set');
+  if (!process.env.DATABASE_URL) {
+    console.error('Error: DATABASE_URL is not set');
     process.exit(1);
   }
 

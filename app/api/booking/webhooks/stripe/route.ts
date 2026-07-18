@@ -2,20 +2,15 @@ import Stripe from 'stripe';
 import { NextRequest } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { getSmoobu, SmoobuError } from '@/lib/smoobu';
-import {
-  getAdmin,
-  jsonError,
-  loadPropertyConfig,
-  resolveSmoobuPropertyId,
-} from '@/lib/booking/service';
+import { jsonError, loadPropertyConfig, resolveSmoobuPropertyId } from '@/lib/booking/service';
 import { sendEmail } from '@/lib/email/resend';
 import {
   guestConfirmationEmail,
   guestRefundEmail,
   hostNotificationEmail,
 } from '@/lib/email/templates';
-import type { BookingRow } from '@/lib/supabase';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { getSql, pgErrorCode } from '@/lib/db';
+import type { BookingRow } from '@/lib/db';
 
 export const maxDuration = 60;
 
@@ -49,34 +44,32 @@ export async function POST(req: NextRequest) {
     return jsonError(400, 'invalid_signature');
   }
 
-  const supabase = getAdmin();
+  const sql = getSql();
 
   // At-least-once dedup: only the first insert of this event id proceeds.
-  const { error: dedupError } = await supabase
-    .from('webhook_events')
-    .insert({ id: event.id, source: 'stripe', type: event.type });
-  if (dedupError) {
-    if (dedupError.code === '23505') return Response.json({ received: true, duplicate: true });
-    console.error('[stripe-webhook] dedup insert failed:', dedupError);
+  try {
+    await sql`insert into webhook_events (id, source, type) values (${event.id}, 'stripe', ${event.type})`;
+  } catch (err) {
+    if (pgErrorCode(err) === '23505') return Response.json({ received: true, duplicate: true });
+    console.error('[stripe-webhook] dedup insert failed:', err);
     return jsonError(500, 'dedup_failed');
   }
 
   try {
     switch (event.type) {
       case 'payment_intent.amount_capturable_updated':
-        await finalizeBooking(supabase, event.data.object, 'authorized');
+        await finalizeBooking(event.data.object, 'authorized');
         break;
       case 'payment_intent.succeeded':
-        await finalizeBooking(supabase, event.data.object, 'captured');
+        await finalizeBooking(event.data.object, 'captured');
         break;
       case 'payment_intent.canceled': {
         // Arrives after our own cancels (then a no-op) or a dashboard cancel.
         const pi = event.data.object;
-        await supabase
-          .from('bookings')
-          .update({ status: 'failed' })
-          .eq('stripe_payment_intent_id', pi.id)
-          .eq('status', 'pending_payment');
+        await sql`
+          update bookings set status = 'failed'
+          where stripe_payment_intent_id = ${pi.id} and status = 'pending_payment'
+        `;
         break;
       }
       case 'payment_intent.payment_failed':
@@ -91,7 +84,7 @@ export async function POST(req: NextRequest) {
     // 500 → Stripe retries; dedup row prevents double side effects because the
     // booking is already claimed (processing) and the resume path continues.
     console.error(`[stripe-webhook] ${event.type} failed:`, err);
-    await supabase.from('webhook_events').delete().eq('id', event.id);
+    await sql`delete from webhook_events where id = ${event.id}`.catch(() => undefined);
     return jsonError(500, 'processing_failed');
   }
 
@@ -99,7 +92,6 @@ export async function POST(req: NextRequest) {
 }
 
 async function finalizeBooking(
-  supabase: SupabaseClient,
   pi: Stripe.PaymentIntent,
   mode: 'authorized' | 'captured'
 ): Promise<void> {
@@ -109,21 +101,20 @@ async function finalizeBooking(
     return;
   }
 
-  // Claim: exactly one worker moves pending_payment → processing.
-  const { data: claimed, error: claimError } = await supabase
-    .from('bookings')
-    .update({ status: 'processing' })
-    .eq('id', bookingId)
-    .eq('status', 'pending_payment')
-    .select()
-    .maybeSingle();
-  if (claimError) throw new Error(`claim failed: ${claimError.message}`);
+  const sql = getSql();
 
-  let booking = claimed as BookingRow | null;
+  // Claim: exactly one worker moves pending_payment → processing.
+  const claimed = await sql`
+    update bookings set status = 'processing'
+    where id = ${bookingId} and status = 'pending_payment'
+    returning *
+  `;
+
+  let booking = (claimed[0] as BookingRow | undefined) ?? null;
 
   if (!booking) {
-    const { data } = await supabase.from('bookings').select('*').eq('id', bookingId).maybeSingle();
-    const existing = data as BookingRow | null;
+    const rows = await sql`select * from bookings where id = ${bookingId}`;
+    const existing = (rows[0] as BookingRow | undefined) ?? null;
 
     if (!existing) {
       console.log('[stripe-webhook] no booking for PI:', pi.id);
@@ -145,12 +136,12 @@ async function finalizeBooking(
   // Note: no expires_at check after a successful claim — a successful claim
   // means the range is still held by this booking, and voiding a legitimate
   // payment then would only hurt the guest. expires_at exists to free ranges
-  // of ABANDONED checkouts (on-read expiry above handles that).
+  // of ABANDONED checkouts (on-read expiry handles that).
 
   // Step 1: ensure the Smoobu reservation exists.
   let reservationId = booking.smoobu_reservation_id;
   if (!reservationId) {
-    const cfg = await loadPropertyConfig(supabase, booking.apartment_id);
+    const cfg = await loadPropertyConfig(booking.apartment_id);
     const propertyId = cfg ? resolveSmoobuPropertyId(cfg) : null;
     if (!propertyId) throw new Error(`no smoobu property id for ${booking.apartment_id}`);
 
@@ -175,7 +166,7 @@ async function finalizeBooking(
         // The window where an OTA booking beat us: release the money, done.
         console.log(`[stripe-webhook] Smoobu rejected ${booking.reference}:`, err.message);
         await releasePayment(pi, mode);
-        await supabase.from('bookings').update({ status: 'failed' }).eq('id', booking.id);
+        await sql`update bookings set status = 'failed' where id = ${booking.id}`;
         if (mode === 'captured') {
           await trySend(guestRefundEmail(booking));
         }
@@ -193,10 +184,7 @@ async function finalizeBooking(
       reservationId = found.id;
     }
 
-    await supabase
-      .from('bookings')
-      .update({ smoobu_reservation_id: reservationId })
-      .eq('id', booking.id);
+    await sql`update bookings set smoobu_reservation_id = ${reservationId} where id = ${booking.id}`;
     booking = { ...booking, smoobu_reservation_id: reservationId };
   }
 
@@ -215,18 +203,18 @@ async function finalizeBooking(
           console.error('[stripe-webhook] rollback cancelReservation failed:', e)
         );
         await releasePayment(pi, mode);
-        await supabase.from('bookings').update({ status: 'failed' }).eq('id', booking.id);
+        await sql`update bookings set status = 'failed' where id = ${booking.id}`;
         return;
       }
       // Already captured on a previous attempt — fine, continue.
     }
   }
 
-  await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', booking.id);
+  await sql`update bookings set status = 'confirmed' where id = ${booking.id}`;
   console.log(`[stripe-webhook] CONFIRMED ${booking.reference} (smoobu ${reservationId})`);
 
   // Emails must never flip a confirmed booking.
-  const cfg = await loadPropertyConfig(supabase, booking.apartment_id);
+  const cfg = await loadPropertyConfig(booking.apartment_id);
   if (cfg) await trySend(guestConfirmationEmail(booking, cfg));
   const notify = process.env.BOOKING_NOTIFY_EMAIL;
   if (notify) await trySend(hostNotificationEmail(booking, notify));

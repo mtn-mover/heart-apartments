@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-// Lazy init (pattern of lib/supabase.ts). Without RESEND_API_KEY emails are
+// Lazy init (pattern of lib/db.ts). Without RESEND_API_KEY emails are
 // logged to the console instead of sent — keeps local dev fully runnable.
 let resendInstance: Resend | null = null;
 

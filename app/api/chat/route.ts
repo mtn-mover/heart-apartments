@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabase } from '@/lib/supabase';
+import { getSql } from '@/lib/db';
 import { retrieveContext, shouldSuggestDiana, shouldSuggestBooking } from '@/lib/rag/retrieval';
 import { buildSystemPrompt } from '@/lib/rag/prompts';
 import { searchWeb } from '@/lib/rag/web-search';
@@ -122,29 +122,24 @@ export async function POST(request: Request) {
     let currentSessionId = sessionId;
     let knownApartment: string | null = null;
 
+    const sql = getSql();
     if (!currentSessionId) {
       // Create new session
-      const { data: session, error: sessionError } = await supabase
-        .from('chat_sessions')
-        .insert({ locale })
-        .select()
-        .single();
-
-      if (sessionError) {
+      try {
+        const rows = await sql`insert into chat_sessions (locale) values (${locale}) returning id`;
+        currentSessionId = rows[0]?.id as string | undefined;
+      } catch (sessionError) {
         console.error('Error creating session:', sessionError);
-      } else {
-        currentSessionId = session.id;
       }
     } else {
       // Load existing session to get apartment
-      const { data: session } = await supabase
-        .from('chat_sessions')
-        .select('apartment')
-        .eq('id', currentSessionId)
-        .single();
-
-      if (session?.apartment) {
-        knownApartment = session.apartment;
+      try {
+        const rows = await sql`select apartment from chat_sessions where id = ${currentSessionId}`;
+        if (rows[0]?.apartment) {
+          knownApartment = rows[0].apartment as string;
+        }
+      } catch (sessionError) {
+        console.error('Error loading session:', sessionError);
       }
     }
 
@@ -155,10 +150,9 @@ export async function POST(request: Request) {
 
       // Save apartment to session
       if (currentSessionId) {
-        await supabase
-          .from('chat_sessions')
-          .update({ apartment: knownApartment })
-          .eq('id', currentSessionId);
+        await sql`update chat_sessions set apartment = ${knownApartment} where id = ${currentSessionId}`.catch(
+          (err) => console.error('Error saving apartment:', err)
+        );
       }
     }
 
@@ -296,21 +290,13 @@ export async function POST(request: Request) {
     const suggestBookingButton = shouldSuggestBooking(message, assistantResponse);
     const finalResponse = assistantResponse;
 
-    // Save messages to chat history
+    // Save messages to chat history (best effort — never fail the response)
     if (currentSessionId) {
-      // Save user message
-      await supabase.from('chat_messages').insert({
-        session_id: currentSessionId,
-        role: 'user',
-        content: message,
-      });
-
-      // Save assistant message
-      await supabase.from('chat_messages').insert({
-        session_id: currentSessionId,
-        role: 'assistant',
-        content: finalResponse,
-      });
+      await sql`
+        insert into chat_messages (session_id, role, content)
+        values (${currentSessionId}, 'user', ${message}),
+               (${currentSessionId}, 'assistant', ${finalResponse})
+      `.catch((err) => console.error('Error saving chat history:', err));
     }
 
     const chatResponse: ChatResponse = {

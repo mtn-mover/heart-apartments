@@ -5,13 +5,13 @@ import { computeQuote, QuoteError } from '@/lib/booking/pricing';
 import { generateReference } from '@/lib/booking/reference';
 import {
   expireStalePendings,
-  getAdmin,
   jsonError,
   loadPropertyConfig,
   PENDING_TTL_MINUTES,
   resolveSmoobuPropertyId,
 } from '@/lib/booking/service';
-import type { BookingRow } from '@/lib/supabase';
+import { getSql, pgErrorCode } from '@/lib/db';
+import type { BookingRow } from '@/lib/db';
 
 /**
  * POST /api/booking/create
@@ -57,14 +57,13 @@ export async function POST(req: NextRequest) {
     return jsonError(400, 'invalid_guest_data');
   }
 
-  const supabase = getAdmin();
-  const cfg = await loadPropertyConfig(supabase, apartmentId);
+  const cfg = await loadPropertyConfig(apartmentId);
   if (!cfg) return jsonError(404, 'unknown_apartment');
   if (!cfg.active) return jsonError(409, 'booking_inactive');
   const propertyId = resolveSmoobuPropertyId(cfg);
   if (!propertyId) return jsonError(409, 'booking_inactive');
 
-  await expireStalePendings(supabase);
+  await expireStalePendings();
 
   let quote;
   try {
@@ -79,38 +78,34 @@ export async function POST(req: NextRequest) {
   // Insert the pending booking. A concurrent overlapping insert loses here
   // atomically (exclusion constraint 23P01); reference collisions (23505 on
   // the unique index) just get a fresh code.
+  const sql = getSql();
   let booking: BookingRow | null = null;
   for (let attempt = 0; attempt < 3 && !booking; attempt++) {
-    const { data, error } = await supabase
-      .from('bookings')
-      .insert({
-        reference: generateReference(),
-        apartment_id: apartmentId,
-        check_in: checkIn,
-        check_out: checkOut,
-        adults: quote.adults,
-        children: quote.children,
-        guest_first_name: firstName,
-        guest_last_name: lastName,
-        guest_email: email,
-        guest_phone: phone || null,
-        guest_message: message || null,
-        locale,
-        price_breakdown: quote,
-        total_rappen: quote.totalRappen,
-        status: 'pending_payment',
-        expires_at: new Date(Date.now() + PENDING_TTL_MINUTES * 60_000).toISOString(),
-      })
-      .select()
-      .single();
-
-    if (!error) {
-      booking = data as BookingRow;
-    } else if (error.code === '23P01') {
-      return jsonError(409, 'dates_just_taken');
-    } else if (error.code !== '23505') {
-      console.error('[create] insert error:', error);
-      return jsonError(500, 'booking_failed');
+    try {
+      const rows = await sql`
+        insert into bookings (
+          reference, apartment_id, check_in, check_out, adults, children,
+          guest_first_name, guest_last_name, guest_email, guest_phone,
+          guest_message, locale, price_breakdown, total_rappen, status, expires_at
+        ) values (
+          ${generateReference()}, ${apartmentId}, ${checkIn}, ${checkOut},
+          ${quote.adults}, ${quote.children}, ${firstName}, ${lastName},
+          ${email}, ${phone || null}, ${message || null}, ${locale},
+          ${JSON.stringify(quote)}::jsonb, ${quote.totalRappen},
+          'pending_payment', now() + make_interval(mins => ${PENDING_TTL_MINUTES})
+        )
+        returning *
+      `;
+      booking = rows[0] as BookingRow;
+    } catch (err) {
+      const code = pgErrorCode(err);
+      if (code === '23P01') {
+        return jsonError(409, 'dates_just_taken');
+      }
+      if (code !== '23505') {
+        console.error('[create] insert error:', err);
+        return jsonError(500, 'booking_failed');
+      }
     }
   }
   if (!booking) return jsonError(500, 'booking_failed');
@@ -133,10 +128,7 @@ export async function POST(req: NextRequest) {
       { idempotencyKey: `pi-create-${booking.id}` }
     );
 
-    await supabase
-      .from('bookings')
-      .update({ stripe_payment_intent_id: pi.id })
-      .eq('id', booking.id);
+    await sql`update bookings set stripe_payment_intent_id = ${pi.id} where id = ${booking.id}`;
 
     return Response.json({
       clientSecret: pi.client_secret,
@@ -146,7 +138,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[create] stripe error:', err);
     // Free the range again — without a PaymentIntent this booking can never proceed.
-    await supabase.from('bookings').update({ status: 'failed' }).eq('id', booking.id);
+    await sql`update bookings set status = 'failed' where id = ${booking.id}`.catch(() => undefined);
     return jsonError(502, 'payment_init_failed');
   }
 }

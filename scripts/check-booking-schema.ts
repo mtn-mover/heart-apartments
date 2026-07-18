@@ -1,46 +1,38 @@
 /**
- * Verify that the booking migration (20260718000000_booking.sql) has been applied.
- * DDL can't run through the JS client, so the migration itself must be pasted
- * into the Supabase Dashboard → SQL Editor; this script only checks the result.
- *
+ * Verify that the Neon schema is in place (db/migrations applied).
  * Run: npx tsx scripts/check-booking-schema.ts
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY ?? '';
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY');
+if (!process.env.DATABASE_URL) {
+  console.error('Missing DATABASE_URL');
   process.exit(1);
 }
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const sql = neon(process.env.DATABASE_URL);
 
 async function check() {
   let ok = true;
 
-  for (const table of ['property_config', 'bookings', 'webhook_events']) {
-    const { error } = await supabase.from(table).select('*', { head: true, count: 'exact' });
-    if (error) {
-      console.log(`❌ ${table}: ${error.message}`);
+  for (const table of ['documents', 'chat_sessions', 'chat_messages', 'property_config', 'bookings', 'webhook_events']) {
+    try {
+      const rows = await sql`select count(*)::int as n from ${sql.unsafe(table)}`;
+      console.log(`✅ ${table} exists (${rows[0].n} rows)`);
+    } catch (err) {
+      console.log(`❌ ${table}: ${err instanceof Error ? err.message : err}`);
       ok = false;
-    } else {
-      console.log(`✅ ${table} exists`);
     }
   }
 
   if (!ok) {
-    console.log('\nApply supabase/migrations/20260718000000_booking.sql in the Supabase SQL Editor:');
-    console.log(`${supabaseUrl.replace('.supabase.co', '')} → Dashboard → SQL Editor`);
+    console.log('\nApply the schema first: npx tsx scripts/db-migrate.ts');
     process.exit(1);
   }
 
-  console.log('\nSchema OK. Next: npx tsx scripts/seed-property-config.ts');
+  console.log('\nSchema OK.');
 }
 
 check().catch(console.error);

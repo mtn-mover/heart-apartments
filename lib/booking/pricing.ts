@@ -7,7 +7,7 @@
  * without any API — see scripts/test-pricing.ts).
  */
 
-import type { PropertyConfig } from '../supabase';
+import type { PropertyConfig } from '../db';
 import type { DailyRate } from '../smoobu';
 import { getApartmentById } from '@/data/apartments';
 import { eachNight, isDateString, nightsBetween, todayString, addDaysString } from './dates';

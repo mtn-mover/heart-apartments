@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
-import { getAdmin, jsonError } from '@/lib/booking/service';
-import type { BookingRow } from '@/lib/supabase';
+import { jsonError } from '@/lib/booking/service';
+import { getSql } from '@/lib/db';
+import type { BookingRow } from '@/lib/db';
 
 /**
  * GET /api/booking/status?ref=LH-XXXXXX&email=…
@@ -16,18 +17,15 @@ export async function GET(req: NextRequest) {
     return jsonError(400, 'invalid_request');
   }
 
-  const { data, error } = await getAdmin()
-    .from('bookings')
-    .select('*')
-    .eq('reference', ref)
-    .maybeSingle();
-
-  if (error) {
-    console.error('[status] error:', error);
+  let booking: BookingRow | null;
+  try {
+    const rows = await getSql()`select * from bookings where reference = ${ref}`;
+    booking = (rows[0] as BookingRow | undefined) ?? null;
+  } catch (err) {
+    console.error('[status] error:', err);
     return jsonError(500, 'status_unavailable');
   }
 
-  const booking = data as BookingRow | null;
   if (!booking || booking.guest_email.toLowerCase() !== email) {
     return jsonError(404, 'not_found');
   }

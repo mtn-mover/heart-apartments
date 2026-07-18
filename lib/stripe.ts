@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-// Lazy init to prevent build-time errors (same pattern as lib/supabase.ts)
+// Lazy init to prevent build-time errors (same pattern as lib/db.ts)
 let stripeInstance: Stripe | null = null;
 
 export function getStripe(): Stripe {

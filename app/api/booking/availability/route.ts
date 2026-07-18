@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getSmoobu } from '@/lib/smoobu';
-import { getAdmin, jsonError, loadPropertyConfig, resolveSmoobuPropertyId } from '@/lib/booking/service';
+import { jsonError, loadPropertyConfig, resolveSmoobuPropertyId } from '@/lib/booking/service';
 import { addDaysString, isDateString } from '@/lib/booking/dates';
 
 /**
@@ -20,8 +20,7 @@ export async function GET(req: NextRequest) {
     return jsonError(400, 'invalid_month');
   }
 
-  const supabase = getAdmin();
-  const cfg = await loadPropertyConfig(supabase, apartment);
+  const cfg = await loadPropertyConfig(apartment);
   if (!cfg) return jsonError(404, 'unknown_apartment');
 
   const inactive = Response.json(

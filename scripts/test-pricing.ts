@@ -4,7 +4,7 @@
  */
 
 import type { DailyRate } from '../lib/smoobu';
-import type { PropertyConfig } from '../lib/supabase';
+import type { PropertyConfig } from '../lib/db';
 import { computeQuote, groupNightlyRates, QuoteError } from '../lib/booking/pricing';
 import { eachNight } from '../lib/booking/dates';
 

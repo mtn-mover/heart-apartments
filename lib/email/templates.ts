@@ -4,7 +4,7 @@
  * the same data the confirmation page renders, so both always match.
  */
 
-import type { BookingRow, PropertyConfig } from '../supabase';
+import type { BookingRow, PropertyConfig } from '../db';
 import { getApartmentById } from '@/data/apartments';
 import { chf } from '../booking/format';
 import { groupNightlyRates } from '../booking/pricing';

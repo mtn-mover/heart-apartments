@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { supabase } from '../supabase';
-import type { SearchResult } from '../supabase';
+import { getSql } from '../db';
+import type { SearchResult } from '../db';
 import type { RetrievalResult, DocumentChunk } from './types';
 
 // Lazy initialization to prevent build-time errors
@@ -30,18 +30,22 @@ export async function searchDocuments(
   matchThreshold = 0.3,
   matchCount = 5
 ): Promise<SearchResult[]> {
-  const { data, error } = await supabase.rpc('search_documents', {
-    query_embedding: queryEmbedding,
-    match_threshold: matchThreshold,
-    match_count: matchCount,
-  });
-
-  if (error) {
+  try {
+    const sql = getSql();
+    const vec = JSON.stringify(queryEmbedding); // '[0.1,0.2,…]' = pgvector literal
+    const rows = await sql`
+      select id, content, source,
+             1 - (embedding <=> ${vec}::vector) as similarity
+      from documents
+      where 1 - (embedding <=> ${vec}::vector) > ${matchThreshold}
+      order by embedding <=> ${vec}::vector
+      limit ${matchCount}
+    `;
+    return rows as SearchResult[];
+  } catch (error) {
     console.error('Error searching documents:', error);
     return [];
   }
-
-  return data || [];
 }
 
 export async function retrieveContext(query: string): Promise<RetrievalResult> {
