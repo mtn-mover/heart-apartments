@@ -201,3 +201,19 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* react-day-picker (booking calendar) — align with the Heart palette */
+.rdp-root {
+  --rdp-accent-color: var(--heart-coral-500);
+  --rdp-accent-background-color: var(--heart-coral-50);
+  --rdp-range_start-color: #ffffff;
+  --rdp-range_start-background: var(--heart-coral-500);
+  --rdp-range_end-color: #ffffff;
+  --rdp-range_end-background: var(--heart-coral-500);
+  --rdp-range_middle-background-color: var(--heart-coral-100);
+  --rdp-today-color: var(--heart-coral-600);
+  --rdp-day-height: 2.5rem;
+  --rdp-day-width: 2.5rem;
+  --rdp-disabled-opacity: 0.35;
+  font-size: 0.9rem;
+}
