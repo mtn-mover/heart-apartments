@@ -48,6 +48,15 @@ const quickActions: QuickAction[] = [
       fr: 'Comment aller de la gare à l\'appartement?',
     },
   },
+  {
+    emoji: '📅',
+    label: { de: 'Buchen', en: 'Book', fr: 'Réserver' },
+    question: {
+      de: 'Wie kann ich eine Wohnung buchen?',
+      en: 'How can I book an apartment?',
+      fr: 'Comment puis-je réserver un appartement?',
+    },
+  },
 ];
 
 export default function QuickActions({ onSelect, locale }: QuickActionsProps) {

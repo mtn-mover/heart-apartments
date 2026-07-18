@@ -51,6 +51,12 @@ export default function Header() {
 
           {/* Language Switcher & Mobile Menu Button */}
           <div className="flex items-center space-x-4">
+            <Link
+              href="/apartments"
+              className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-heart-coral-500 text-white hover:bg-heart-coral-600 transition-colors"
+            >
+              {t('book')}
+            </Link>
             <LanguageSwitcher />
 
             {/* Mobile Menu Button */}

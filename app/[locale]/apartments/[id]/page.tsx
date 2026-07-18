@@ -263,15 +263,11 @@ function ApartmentDetailContent({ id }: { id: string }) {
 
               {/* Booking CTA */}
               <BookingCTA
+                apartmentId={apartment.id}
                 airbnbUrl={apartment.airbnbUrl}
                 size="large"
                 className="w-full"
               />
-
-              {/* Airbnb Note */}
-              <p className="text-center text-xs text-slate-500 mt-4">
-                Secure booking via Airbnb
-              </p>
             </div>
           </div>
         </div>

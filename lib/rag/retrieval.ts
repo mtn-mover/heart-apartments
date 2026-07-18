@@ -150,3 +150,35 @@ export function shouldSuggestDiana(
   // Default: bot handled it, no contact needed
   return false;
 }
+
+/**
+ * Show the "check availability & book" button when the exchange is about a
+ * NEW booking (availability, prices, how to book) — the assistant itself has
+ * no availability data and always points to the direct-booking pages.
+ */
+export function shouldSuggestBooking(userMessage: string, assistantResponse: string): boolean {
+  const lowerUser = userMessage.toLowerCase();
+  const lowerResponse = assistantResponse.toLowerCase();
+
+  const userBookingIntent = [
+    // German
+    'frei', 'verfügbar', 'verfügbarkeit', 'buchen', 'buchung', 'reservieren',
+    'reservation', 'preis', 'kosten', 'was kostet', 'übernachtung',
+    // English
+    'available', 'availability', 'book', 'booking', 'reserve', 'price', 'cost',
+    'how much', 'per night', 'vacancy',
+    // French
+    'disponible', 'disponibilité', 'réserver', 'réservation', 'prix', 'tarif',
+  ];
+
+  const responseBookingPhrases = [
+    'direkt buchen', 'buchungsseite', 'direkt auf unserer website',
+    'book directly', 'booking page', 'directly on our website',
+    'réserver directement', 'sur notre site',
+  ];
+
+  return (
+    userBookingIntent.some((kw) => lowerUser.includes(kw)) ||
+    responseBookingPhrases.some((kw) => lowerResponse.includes(kw))
+  );
+}

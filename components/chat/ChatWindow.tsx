@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import ChatMessage from './ChatMessage';
 import ChatInput, { type ChatInputRef } from './ChatInput';
 import QuickActions from './QuickActions';
@@ -83,6 +84,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
         content: data.response,
         timestamp: new Date(),
         showContactButton: data.suggestContactButton,
+        showBookingButton: data.suggestBookingButton,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
@@ -184,6 +186,28 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
                     🏠 {apt}
                   </button>
                 ))}
+              </div>
+            )}
+            {message.showBookingButton && (
+              <div className="mt-2 ml-2">
+                <Link
+                  href="/apartments"
+                  className="
+                    inline-flex items-center gap-2
+                    px-4 py-2
+                    bg-heart-coral-500 hover:bg-heart-coral-600
+                    rounded-full
+                    text-sm text-white font-medium
+                    transition-colors duration-200
+                  "
+                >
+                  <span>📅</span>
+                  {locale === 'de'
+                    ? 'Verfügbarkeit prüfen & buchen'
+                    : locale === 'fr'
+                      ? 'Vérifier & réserver'
+                      : 'Check availability & book'}
+                </Link>
               </div>
             )}
             {message.showContactButton && (

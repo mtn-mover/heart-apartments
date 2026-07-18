@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@/lib/supabase';
-import { retrieveContext, shouldSuggestDiana } from '@/lib/rag/retrieval';
+import { retrieveContext, shouldSuggestDiana, shouldSuggestBooking } from '@/lib/rag/retrieval';
 import { buildSystemPrompt } from '@/lib/rag/prompts';
 import { searchWeb } from '@/lib/rag/web-search';
 import type { ChatRequest, ChatResponse } from '@/lib/rag/types';
@@ -293,6 +293,7 @@ export async function POST(request: Request) {
     // Check if we should suggest contacting Diana
     // The bot already mentions Diana in its response, so we just show the button
     const suggestContactButton = shouldSuggestDiana(confidence, message, assistantResponse);
+    const suggestBookingButton = shouldSuggestBooking(message, assistantResponse);
     const finalResponse = assistantResponse;
 
     // Save messages to chat history
@@ -317,6 +318,7 @@ export async function POST(request: Request) {
       sessionId: currentSessionId || '',
       confidence,
       suggestContactButton,
+      suggestBookingButton,
       detectedLanguage,
     };
 

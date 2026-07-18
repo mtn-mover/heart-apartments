@@ -4,6 +4,7 @@ export interface Message {
   content: string;
   timestamp: Date;
   showContactButton?: boolean;
+  showBookingButton?: boolean;
 }
 
 export interface ChatRequest {
@@ -18,6 +19,7 @@ export interface ChatResponse {
   sessionId: string;
   confidence: number;
   suggestContactButton: boolean;
+  suggestBookingButton?: boolean;
   detectedLanguage: string;
 }
 

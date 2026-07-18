@@ -3,7 +3,8 @@
     "home": "Home",
     "apartments": "Apartments",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "book": "Book now"
   },
   "home": {
     "heroTitle": "Little Heart Guesthouse",
@@ -79,7 +80,12 @@
     "hostedBy": "Hosted by Diana",
     "hostBio": "Superhost with 9+ years of experience welcoming guests to Interlaken. Passionate about nature, family, and ensuring every guest feels at home.",
     "hostRating": "4.75 rating",
-    "hostResponse": "< 1 hour response"
+    "hostResponse": "< 1 hour response",
+    "bookDirect": "Book directly",
+    "bookDirectSave": "Book directly — save {pct}%",
+    "bookAirbnbAlt": "or book on Airbnb",
+    "secureNote": "Secure direct booking · Airbnb available as alternative",
+    "secureAirbnb": "Secure booking via Airbnb"
   },
   "amenities": {
     "ac": "Air Conditioning",
@@ -144,10 +150,15 @@
     "phone": "Phone",
     "address": "Address",
     "addressText": "Interlaken, Switzerland",
-    "bookingNote": "For booking inquiries, please visit our apartment listings on Airbnb.",
+    "bookingNote": "Book your apartment directly with us — or via Airbnb if you prefer.",
     "viewOnAirbnb": "View All Apartments on Airbnb",
     "mapTitle": "Find Us in Interlaken",
-    "mapSubtitle": "Two locations in the heart of Interlaken"
+    "mapSubtitle": "Two locations in the heart of Interlaken",
+    "bookDirectBtn": "Book {name} directly",
+    "viewAirbnbAlt": "View on Airbnb",
+    "readyTitle": "Ready to Book?",
+    "readyText": "Check availability and book your stay directly with us — best price, no platform fees.",
+    "browseApartments": "Browse Apartments"
   },
   "footer": {
     "tagline": "Cozy apartments, generous hospitality",

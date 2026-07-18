@@ -60,18 +60,16 @@ function ContactPageContent() {
             <h3 className="text-xl font-semibold text-slate-900 mb-4 font-heading">{t('bookingNote')}</h3>
             <div className="flex flex-wrap justify-center gap-4">
               {apartments.map((apartment) => (
-                <a
+                <Link
                   key={apartment.id}
-                  href={apartment.airbnbUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-opal-blue hover:text-opal-blue transition-colors"
+                  href={`/book/${apartment.id}`}
+                  className="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-heart-coral-500 hover:text-heart-coral-500 transition-colors"
                 >
                   {apartment.name}
                   <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -92,15 +90,15 @@ function ContactPageContent() {
       {/* CTA */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6 font-heading">Ready to Book?</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-6 font-heading">{t('readyTitle')}</h2>
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
-            Check out our apartments and book your stay through Airbnb for a secure and easy booking experience.
+            {t('readyText')}
           </p>
           <Link
             href="/apartments"
             className="inline-flex items-center px-8 py-4 bg-opal-blue hover:bg-opal-teal text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
           >
-            Browse Apartments
+            {t('browseApartments')}
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
