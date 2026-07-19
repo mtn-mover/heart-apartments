@@ -127,6 +127,8 @@ async function finalizeBooking(
 
   let booking = (claimed[0] as BookingRow | undefined) ?? null;
 
+  const wonClaim = booking !== null;
+
   if (!booking) {
     const rows = await sql`select * from bookings where id = ${bookingId}`;
     const existing = (rows[0] as BookingRow | undefined) ?? null;
@@ -170,43 +172,59 @@ async function finalizeBooking(
     const propertyId = cfg ? resolveSmoobuPropertyId(cfg) : null;
     if (!propertyId) throw new Error(`no smoobu property id for ${booking.apartment_id}`);
 
-    try {
-      const created = await getSmoobu().createReservation({
-        propertyId,
-        checkIn: booking.check_in,
-        checkOut: booking.check_out,
-        firstName: booking.guest_first_name,
-        lastName: booking.guest_last_name,
-        email: booking.guest_email,
-        phone: booking.guest_phone ?? undefined,
-        adults: booking.adults,
-        children: booking.children,
-        priceRappen: booking.total_rappen,
-        reference: booking.reference,
-        language: booking.locale,
-      });
-      reservationId = created.id;
-    } catch (err) {
-      if (err instanceof SmoobuError && err.isRejection) {
-        // The window where an OTA booking beat us: release the money, done.
-        console.log(`[stripe-webhook] Smoobu rejected ${booking.reference}:`, err.message);
-        await releasePayment(pi, mode);
-        await sql`update bookings set status = 'failed' where id = ${booking.id}`;
-        if (mode === 'captured') {
-          await trySend(guestRefundEmail(booking));
-        }
-        return;
-      }
-      // Transport/server trouble — the reservation MAY exist. Reconcile before
-      // giving up; otherwise rethrow so Stripe retries and resume continues.
-      const found = await getSmoobu()
-        .findReservationByReference(propertyId, booking.reference, {
-          from: booking.check_in,
-          to: booking.check_out,
+    const findExisting = () =>
+      getSmoobu()
+        .findReservationByReference(propertyId, booking!.reference, {
+          from: booking!.check_in,
+          to: booking!.check_out,
         })
         .catch(() => null);
-      if (!found) throw err;
-      reservationId = found.id;
+
+    // Resume path (we did NOT win the claim): another worker may have created
+    // the reservation and died before persisting its id — look it up by our
+    // reference first instead of blindly creating a duplicate.
+    if (!wonClaim) {
+      const found = await findExisting();
+      if (found) {
+        reservationId = found.id;
+        console.log(`[stripe-webhook] resume: found existing reservation ${found.id} for ${booking.reference}`);
+      }
+    }
+
+    if (!reservationId) {
+      try {
+        const created = await getSmoobu().createReservation({
+          propertyId,
+          checkIn: booking.check_in,
+          checkOut: booking.check_out,
+          firstName: booking.guest_first_name,
+          lastName: booking.guest_last_name,
+          email: booking.guest_email,
+          phone: booking.guest_phone ?? undefined,
+          adults: booking.adults,
+          children: booking.children,
+          priceRappen: booking.total_rappen,
+          reference: booking.reference,
+          language: booking.locale,
+        });
+        reservationId = created.id;
+      } catch (err) {
+        if (err instanceof SmoobuError && err.isRejection) {
+          // The window where an OTA booking beat us: release the money, done.
+          console.log(`[stripe-webhook] Smoobu rejected ${booking.reference}:`, err.message);
+          await releasePayment(pi, mode);
+          await sql`update bookings set status = 'failed' where id = ${booking.id}`;
+          if (mode === 'captured') {
+            await trySend(guestRefundEmail(booking));
+          }
+          return;
+        }
+        // Transport/server trouble — the reservation MAY exist. Reconcile before
+        // giving up; otherwise rethrow so Stripe retries and resume continues.
+        const found = await findExisting();
+        if (!found) throw err;
+        reservationId = found.id;
+      }
     }
 
     await sql`update bookings set smoobu_reservation_id = ${reservationId} where id = ${booking.id}`;

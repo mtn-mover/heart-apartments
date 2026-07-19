@@ -126,6 +126,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'empty_message' }, { status: 400 });
     }
     const conversationHistory = (Array.isArray(body.conversationHistory) ? body.conversationHistory : [])
+      .filter((m) => m && (m.role === 'user' || m.role === 'assistant'))
       .slice(-10)
       .map((m) => ({ role: m.role, content: String(m.content ?? '').slice(0, 2000) }));
 
@@ -310,10 +311,14 @@ export async function POST(request: Request) {
           content: 'No further searches available — please answer with what you have.',
         })),
       });
+      // tools must stay declared (the history contains tool blocks);
+      // tool_choice 'none' forces a plain text answer.
       response = await getAnthropic().messages.create({
         model: 'claude-sonnet-5',
         max_tokens: 1024,
         system: systemPrompt,
+        tools: [WEB_SEARCH_TOOL],
+        tool_choice: { type: 'none' },
         messages,
       });
     }
