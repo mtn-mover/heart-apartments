@@ -236,6 +236,8 @@
       "beyond_horizon": "Bookings are possible up to 18 months ahead.",
       "booking_inactive": "Online booking is currently unavailable for this apartment.",
       "generic": "Something went wrong. Please try again."
-    }
+    },
+    "confTimeoutTitle": "Almost there…",
+    "confTimeoutText": "Your payment went through and we're finalising the booking. You'll receive a confirmation email shortly. If anything is unclear, contact us with your reference below."
   }
 }

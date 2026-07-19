@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { jsonError } from '@/lib/booking/service';
 import { sendEmail } from '@/lib/email/resend';
@@ -17,10 +17,16 @@ import type { BookingRow } from '@/lib/db';
  * Phase 2: verify the exact action names / payload shape against a real
  * account and add an API re-fetch of the reservation before processing.
  */
+function tokenMatches(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.SMOOBU_WEBHOOK_SECRET;
   if (!secret) return jsonError(503, 'webhook_not_configured');
-  if (req.nextUrl.searchParams.get('token') !== secret) {
+  if (!tokenMatches(req.nextUrl.searchParams.get('token') ?? '', secret)) {
     return jsonError(401, 'invalid_token');
   }
 

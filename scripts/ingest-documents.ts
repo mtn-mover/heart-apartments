@@ -35,6 +35,10 @@ interface DocumentChunk {
   metadata: Record<string, unknown>;
 }
 
+// A single failed insert must not let the script report success with an
+// incomplete RAG corpus — main() checks this and exits nonzero.
+let insertFailures = 0;
+
 // Extract text from Word document
 async function extractDocx(filePath: string): Promise<string> {
   const buffer = await fs.readFile(filePath);
@@ -121,6 +125,7 @@ async function ingestDocument(filePath: string): Promise<void> {
       console.log(`  Inserted chunk ${chunk.chunkIndex}`);
     } catch (error) {
       console.error(`  Error inserting chunk ${chunk.chunkIndex}:`, error);
+      insertFailures++;
     }
 
     // Rate limiting
@@ -174,6 +179,7 @@ Ideal für: ${apt.de.idealFor}
       console.log(`  Inserted: ${apt.id}`);
     } catch (error) {
       console.error(`  Error inserting ${apt.id}:`, error);
+      insertFailures++;
     }
 
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -187,7 +193,10 @@ async function clearDocuments(): Promise<void> {
     await sql`delete from documents`;
     console.log('Documents cleared.');
   } catch (error) {
+    // Abort: continuing after a failed clear would ingest against stale data
+    // and create duplicate/inconsistent retrieval results.
     console.error('Error clearing documents:', error);
+    throw error;
   }
 }
 
@@ -233,6 +242,10 @@ async function main(): Promise<void> {
   // Ingest apartment data
   await ingestApartmentData();
 
+  if (insertFailures > 0) {
+    console.error(`\n❌ ${insertFailures} chunk(s) failed to insert — RAG corpus is incomplete.`);
+    process.exit(1);
+  }
   console.log('\n=== Ingestion Complete ===');
 }
 

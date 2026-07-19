@@ -30,6 +30,7 @@ export default function ConfirmationStatus({ reference, apartmentId }: { referen
   const [emailInput, setEmailInput] = useState('');
   const [result, setResult] = useState<StatusResponse | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const apartment = getApartmentById(apartmentId);
 
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function ConfirmationStatus({ reference, apartmentId }: { referen
     let stopped = false;
     let attempts = 0;
 
+    const MAX_ATTEMPTS = 45; // ~90 s
     const tick = async () => {
       if (stopped) return;
       attempts += 1;
@@ -67,12 +69,14 @@ export default function ConfirmationStatus({ reference, apartmentId }: { referen
         setResult(data);
         setNotFound(false);
         if (data.status === 'pending_payment' || data.status === 'processing') {
-          if (attempts < 45) setTimeout(tick, 2000);
+          if (attempts < MAX_ATTEMPTS) setTimeout(tick, 2000);
+          else setTimedOut(true);
           return;
         }
         return;
       }
-      if (!stopped && attempts < 45 && !notFound) setTimeout(tick, 2000);
+      if (!stopped && attempts < MAX_ATTEMPTS && !notFound) setTimeout(tick, 2000);
+      else if (!stopped && !notFound) setTimedOut(true);
     };
 
     void tick();
@@ -115,6 +119,21 @@ export default function ConfirmationStatus({ reference, apartmentId }: { referen
   }
 
   const settled = result && result.status !== 'pending_payment' && result.status !== 'processing';
+
+  // Webhook hasn't settled the booking within the polling window — don't spin
+  // forever; tell the guest their reference and that email will confirm.
+  if (!settled && timedOut) {
+    return (
+      <div className="max-w-lg mx-auto text-center">
+        <h1 className="text-xl md:text-2xl font-bold mb-3 font-heading">{t('confTimeoutTitle')}</h1>
+        <p className="text-slate-600 mb-4">{t('confTimeoutText')}</p>
+        <p className="text-sm text-slate-500">
+          {t('confReference')}:{' '}
+          <span className="font-bold tracking-widest text-heart-coral-500">{reference}</span>
+        </p>
+      </div>
+    );
+  }
 
   if (!settled) {
     return (

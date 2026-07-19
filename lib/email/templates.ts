@@ -16,6 +16,19 @@ const COLORS = {
   cream: '#FAF9F6',
 };
 
+// Guest-controlled fields (name, message, phone) are interpolated into HTML
+// email bodies — escape them so a name like `<a href="phish">` can't inject
+// markup into the confirmation mail or Diana's notification. Plain-text
+// versions stay raw (nothing to inject there).
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function lang(locale: string): 'de' | 'en' {
   return locale === 'de' ? 'de' : 'en';
 }
@@ -135,7 +148,7 @@ export function guestConfirmationEmail(booking: BookingRow, cfg: PropertyConfig)
         };
 
   const bodyHtml = `
-<p style="font-size:14px;">${t.hello},</p>
+<p style="font-size:14px;">${escapeHtml(t.hello)},</p>
 <p style="font-size:14px;">${t.intro}</p>
 <p style="font-size:14px;margin:20px 0 4px;"><strong>${t.reference}:</strong>
   <span style="font-size:18px;letter-spacing:1px;color:${COLORS.coral};font-weight:bold;">${booking.reference}</span></p>
@@ -182,7 +195,7 @@ export function hostNotificationEmail(booking: BookingRow, to: string): Outgoing
     `Die Reservierung ist bereits in Smoobu eingetragen (Airbnb/Booking.com werden automatisch geblockt).`,
   ].filter(Boolean);
 
-  const bodyHtml = `<p style="font-size:14px;">${lines.join('<br>')}</p>`;
+  const bodyHtml = `<p style="font-size:14px;">${lines.map(escapeHtml).join('<br>')}</p>`;
   return {
     to,
     subject,
@@ -211,17 +224,18 @@ export function guestRefundEmail(booking: BookingRow): OutgoingEmail {
   return {
     to: booking.guest_email,
     subject: t.subject,
-    html: layout(t.heading, `<p style="font-size:14px;">${t.body}</p>`),
+    html: layout(t.heading, `<p style="font-size:14px;">${escapeHtml(t.body)}</p>`),
     text: t.body,
   };
 }
 
 export function hostCancellationEmail(booking: BookingRow, to: string): OutgoingEmail {
   const subject = `Direktbuchung ${booking.reference} wurde in Smoobu storniert`;
-  const text = [
+  const lines = [
     `Die Direktbuchung ${booking.reference} (${booking.apartment_id.toUpperCase()}, ${booking.check_in}–${booking.check_out}, ${booking.guest_first_name} ${booking.guest_last_name}) wurde in Smoobu storniert.`,
     ``,
     `WICHTIG: Falls dem Gast eine Rückerstattung zusteht, bitte manuell im Stripe-Dashboard auslösen (Zahlung ${booking.stripe_payment_intent_id ?? '—'}).`,
-  ].join('\n');
-  return { to, subject, html: layout('Buchung storniert', `<p style="font-size:14px;">${text.replaceAll('\n', '<br>')}</p>`), text };
+  ];
+  const bodyHtml = `<p style="font-size:14px;">${lines.map(escapeHtml).join('<br>')}</p>`;
+  return { to, subject, html: layout('Buchung storniert', bodyHtml), text: lines.join('\n') };
 }

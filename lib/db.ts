@@ -1,4 +1,4 @@
-import { neon, NeonQueryFunction } from '@neondatabase/serverless';
+import { neon, NeonQueryFunction, types } from '@neondatabase/serverless';
 
 /**
  * Neon Postgres access (little-heart-db). One serverless HTTP driver for
@@ -9,6 +9,17 @@ import { neon, NeonQueryFunction } from '@neondatabase/serverless';
  * Template values are parameterized by the driver. Errors carry the Postgres
  * SQLSTATE in err.code (e.g. 23P01 exclusion violation, 23505 unique).
  */
+
+// pg-types defaults the driver inherits are wrong for how this app uses two
+// column kinds; override them globally before the first query:
+//  - date (OID 1082): default parses to a JS Date at LOCAL midnight, which
+//    serialises to the PREVIOUS UTC day on a +hours host and breaks every
+//    date round-trip (Smoobu, emails, confirmation). Keep the raw 'YYYY-MM-DD'.
+//  - int8 (OID 20): default returns a string; smoobu_reservation_id is used as
+//    a number (Stripe rollback, mock Map key). Smoobu ids are well within
+//    2^53, so Number() is safe here.
+types.setTypeParser(1082, (v) => v);
+types.setTypeParser(20, (v) => (v === null ? null : Number(v)));
 
 let sqlInstance: NeonQueryFunction<false, false> | null = null;
 

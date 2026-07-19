@@ -5,12 +5,27 @@
  */
 
 import { getSql, PropertyConfig } from '../db';
-import { apartments } from '@/data/apartments';
 
 export const PENDING_TTL_MINUTES = 30;
 
+// Stable, explicit mock Smoobu ids — must NOT depend on array order in
+// data/apartments.ts (reordering would silently reassign an apartment).
+const MOCK_SMOOBU_IDS: Record<string, number> = {
+  heart1: 9001,
+  heart2: 9002,
+  heart3: 9003,
+  heart4: 9004,
+  heart5: 9005,
+};
+
+/**
+ * Mock mode is for local development only. In production it must be explicitly
+ * requested (SMOOBU_MOCK=1) — a missing SMOOBU_API_KEY must NEVER silently fall
+ * back to fake availability on the live site (fail closed instead).
+ */
 export function isMockMode(): boolean {
-  return process.env.SMOOBU_MOCK === '1' || !process.env.SMOOBU_API_KEY;
+  if (process.env.SMOOBU_MOCK === '1') return true;
+  return process.env.NODE_ENV !== 'production' && !process.env.SMOOBU_API_KEY;
 }
 
 export async function loadPropertyConfig(apartmentId: string): Promise<PropertyConfig | null> {
@@ -26,8 +41,7 @@ export async function loadPropertyConfig(apartmentId: string): Promise<PropertyC
 export function resolveSmoobuPropertyId(cfg: PropertyConfig): number | null {
   if (cfg.smoobu_property_id) return cfg.smoobu_property_id;
   if (isMockMode()) {
-    const index = apartments.findIndex((a) => a.id === cfg.id);
-    return index >= 0 ? 9001 + index : null;
+    return MOCK_SMOOBU_IDS[cfg.id] ?? null;
   }
   return null;
 }
@@ -42,7 +56,7 @@ export async function expireStalePendings(): Promise<void> {
   const sql = getSql();
   await sql`
     update bookings set status = 'expired'
-    where status = 'pending_payment' and expires_at < now()
+    where status = 'pending_payment' and expires_at <= now()
   `;
 }
 

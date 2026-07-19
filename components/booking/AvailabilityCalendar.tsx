@@ -130,6 +130,7 @@ export default function AvailabilityCalendar({ apartmentId, checkIn, checkOut, o
         endMonth={maxMonth}
         disabled={isDisabled}
         excludeDisabled
+        resetOnSelect
         locale={locale === 'de' ? rdpDe : rdpEn}
       />
       {active === null && !loadError && (

@@ -236,6 +236,8 @@
       "beyond_horizon": "Buchungen sind bis 18 Monate im Voraus möglich.",
       "booking_inactive": "Die Online-Buchung ist für diese Wohnung derzeit nicht verfügbar.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
-    }
+    },
+    "confTimeoutTitle": "Fast geschafft…",
+    "confTimeoutText": "Ihre Zahlung war erfolgreich und wir schliessen die Buchung ab. Sie erhalten in Kürze eine Bestätigungs-E-Mail. Bei Fragen kontaktieren Sie uns mit Ihrer Referenz unten."
   }
 }

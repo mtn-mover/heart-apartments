@@ -116,7 +116,18 @@ function detectLanguage(text: string): string {
 export async function POST(request: Request) {
   try {
     const body: ChatRequest = await request.json();
-    const { message, sessionId, conversationHistory, locale } = body;
+    const { sessionId, locale } = body;
+
+    // Guardrails against an unauthenticated cost/abuse vector: cap the message
+    // length and the client-supplied history so a single request can't drive
+    // an unbounded number/size of LLM + search calls.
+    const message = typeof body.message === 'string' ? body.message.slice(0, 2000) : '';
+    if (!message.trim()) {
+      return NextResponse.json({ error: 'empty_message' }, { status: 400 });
+    }
+    const conversationHistory = (Array.isArray(body.conversationHistory) ? body.conversationHistory : [])
+      .slice(-10)
+      .map((m) => ({ role: m.role, content: String(m.content ?? '').slice(0, 2000) }));
 
     // Create or get session
     let currentSessionId = sessionId;
@@ -168,9 +179,8 @@ export async function POST(request: Request) {
     // Build messages array for Claude
     const messages: Anthropic.MessageParam[] = [];
 
-    // Add conversation history (last 10 messages for context)
-    const recentHistory = conversationHistory.slice(-10);
-    for (const msg of recentHistory) {
+    // Conversation history is already capped to the last 10 (see top of handler)
+    for (const msg of conversationHistory) {
       messages.push({
         role: msg.role,
         content: msg.content,
@@ -280,6 +290,30 @@ export async function POST(request: Request) {
         max_tokens: 1024,
         system: systemPrompt,
         tools: [WEB_SEARCH_TOOL],
+        messages,
+      });
+    }
+
+    // If the round cap was hit while Claude still wanted to search, its last
+    // reply has only tool_use blocks (no text). Answer those tool calls and do
+    // one final call WITHOUT tools so we always return a real text message.
+    if (response.stop_reason === 'tool_use') {
+      const pending = response.content.filter(
+        (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
+      );
+      messages.push({ role: 'assistant', content: response.content });
+      messages.push({
+        role: 'user',
+        content: pending.map((b) => ({
+          type: 'tool_result' as const,
+          tool_use_id: b.id,
+          content: 'No further searches available — please answer with what you have.',
+        })),
+      });
+      response = await getAnthropic().messages.create({
+        model: 'claude-sonnet-5',
+        max_tokens: 1024,
+        system: systemPrompt,
         messages,
       });
     }

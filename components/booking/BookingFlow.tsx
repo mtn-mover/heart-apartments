@@ -44,6 +44,7 @@ export default function BookingFlow({
   const [adults, setAdults] = useState(Math.min(initialAdults ?? 2, maxGuests));
   const [children, setChildren] = useState(Math.min(initialChildren ?? 0, Math.max(0, maxGuests - (initialAdults ?? 2))));
   const [meta, setMeta] = useState<AvailabilityMeta | null>(null);
+  const [calendarKey, setCalendarKey] = useState(0);
 
   const [quote, setQuote] = useState<QuoteBreakdown | null>(null);
   const [quoting, setQuoting] = useState(false);
@@ -150,8 +151,13 @@ export default function BookingFlow({
         const err = data as ApiError;
         setCreateError(err);
         if (err.error === 'dates_just_taken' || err.error === 'not_available') {
+          // Clear the selection and force the calendar to refetch, so the guest
+          // isn't stuck on dates that are no longer bookable.
           setStep('dates');
           setQuote(null);
+          setCheckIn(undefined);
+          setCheckOut(undefined);
+          setCalendarKey((k) => k + 1);
         }
         return;
       }
@@ -243,6 +249,7 @@ export default function BookingFlow({
           <div>
             <h2 className="text-base font-semibold mb-3">{t('selectDates')}</h2>
             <AvailabilityCalendar
+              key={calendarKey}
               apartmentId={apartmentId}
               checkIn={checkIn}
               checkOut={checkOut}
@@ -263,7 +270,12 @@ export default function BookingFlow({
                   id="bk-adults"
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm bg-white"
                   value={adults}
-                  onChange={(e) => setAdults(Number(e.target.value))}
+                  onChange={(e) => {
+                    const n = Number(e.target.value);
+                    setAdults(n);
+                    // Keep total within the apartment limit
+                    setChildren((c) => Math.min(c, maxGuests - n));
+                  }}
                 >
                   {Array.from({ length: maxGuests }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>

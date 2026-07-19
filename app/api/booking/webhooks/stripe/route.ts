@@ -9,7 +9,7 @@ import {
   guestRefundEmail,
   hostNotificationEmail,
 } from '@/lib/email/templates';
-import { getSql, pgErrorCode } from '@/lib/db';
+import { getSql } from '@/lib/db';
 import type { BookingRow } from '@/lib/db';
 
 export const maxDuration = 60;
@@ -46,11 +46,26 @@ export async function POST(req: NextRequest) {
 
   const sql = getSql();
 
-  // At-least-once dedup: only the first insert of this event id proceeds.
+  // Record the event; if it already exists this is a redelivery. We do NOT
+  // early-return on redelivery: a prior attempt may have died hard (timeout/
+  // OOM) after inserting this row but before finishing, which would otherwise
+  // strand the booking in 'processing' forever while Stripe stops retrying.
+  // Instead we always (re)process — every handler below is idempotent (claim
+  // guard, resume via stored reservation id, capture/refund idempotency keys,
+  // and the confirm guard that gates emails).
+  let isRedelivery = false;
   try {
-    await sql`insert into webhook_events (id, source, type) values (${event.id}, 'stripe', ${event.type})`;
+    const inserted = await sql`
+      insert into webhook_events (id, source, type)
+      values (${event.id}, 'stripe', ${event.type})
+      on conflict (id) do nothing
+      returning id
+    `;
+    isRedelivery = inserted.length === 0;
+    if (isRedelivery) {
+      console.log('[stripe-webhook] redelivery, reprocessing idempotently:', event.id, event.type);
+    }
   } catch (err) {
-    if (pgErrorCode(err) === '23505') return Response.json({ received: true, duplicate: true });
     console.error('[stripe-webhook] dedup insert failed:', err);
     return jsonError(500, 'dedup_failed');
   }
@@ -81,10 +96,10 @@ export async function POST(req: NextRequest) {
         console.log('[stripe-webhook] ignored event:', event.type);
     }
   } catch (err) {
-    // 500 → Stripe retries; dedup row prevents double side effects because the
-    // booking is already claimed (processing) and the resume path continues.
+    // 500 → Stripe retries. We keep the webhook_events row (marking this a
+    // redelivery next time) and rely on handler idempotency; the booking may
+    // sit in 'processing' between attempts, and the resume path continues it.
     console.error(`[stripe-webhook] ${event.type} failed:`, err);
-    await sql`delete from webhook_events where id = ${event.id}`.catch(() => undefined);
     return jsonError(500, 'processing_failed');
   }
 
@@ -137,6 +152,16 @@ async function finalizeBooking(
   // means the range is still held by this booking, and voiding a legitimate
   // payment then would only hurt the guest. expires_at exists to free ranges
   // of ABANDONED checkouts (on-read expiry handles that).
+
+  // Defense in depth: the event is signature-verified and only our server can
+  // mint a PI carrying this bookingId, but never act on a PI that doesn't match
+  // the one we recorded for this booking.
+  if (booking.stripe_payment_intent_id && booking.stripe_payment_intent_id !== pi.id) {
+    console.error(
+      `[stripe-webhook] PI mismatch for ${booking.reference}: booking has ${booking.stripe_payment_intent_id}, event ${pi.id}`
+    );
+    return;
+  }
 
   // Step 1: ensure the Smoobu reservation exists.
   let reservationId = booking.smoobu_reservation_id;
@@ -210,10 +235,21 @@ async function finalizeBooking(
     }
   }
 
-  await sql`update bookings set status = 'confirmed' where id = ${booking.id}`;
+  // Confirm-and-claim in one step: only the worker that actually flips
+  // processing → confirmed sends the emails. Without this guard, the
+  // amount_capturable_updated and payment_intent.succeeded events can both
+  // reach this point for the same booking and send duplicate confirmations.
+  const confirmed = await sql`
+    update bookings set status = 'confirmed'
+    where id = ${booking.id} and status = 'processing'
+    returning id
+  `;
+  if (confirmed.length === 0) {
+    console.log(`[stripe-webhook] ${booking.reference} already confirmed by another worker — no duplicate emails`);
+    return;
+  }
   console.log(`[stripe-webhook] CONFIRMED ${booking.reference} (smoobu ${reservationId})`);
 
-  // Emails must never flip a confirmed booking.
   const cfg = await loadPropertyConfig(booking.apartment_id);
   if (cfg) await trySend(guestConfirmationEmail(booking, cfg));
   const notify = process.env.BOOKING_NOTIFY_EMAIL;

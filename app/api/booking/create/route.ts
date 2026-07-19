@@ -28,7 +28,11 @@ import type { BookingRow } from '@/lib/db';
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
-    body = await req.json();
+    const parsed: unknown = await req.json();
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return jsonError(400, 'invalid_json');
+    }
+    body = parsed as Record<string, unknown>;
   } catch {
     return jsonError(400, 'invalid_json');
   }
@@ -63,8 +67,6 @@ export async function POST(req: NextRequest) {
   const propertyId = resolveSmoobuPropertyId(cfg);
   if (!propertyId) return jsonError(409, 'booking_inactive');
 
-  await expireStalePendings();
-
   let quote;
   try {
     const rates = await getSmoobu().getRates(propertyId, checkIn, checkOut);
@@ -75,11 +77,16 @@ export async function POST(req: NextRequest) {
     return jsonError(502, 'quote_unavailable');
   }
 
+  // Free abandoned pendings right before the insert (getRates above can take
+  // seconds; expiring earlier would leave a just-expired row blocking us).
+  const sql = getSql();
+  await expireStalePendings();
+
   // Insert the pending booking. A concurrent overlapping insert loses here
   // atomically (exclusion constraint 23P01); reference collisions (23505 on
   // the unique index) just get a fresh code.
-  const sql = getSql();
   let booking: BookingRow | null = null;
+  let recycledOwnPending = false;
   for (let attempt = 0; attempt < 3 && !booking; attempt++) {
     try {
       const rows = await sql`
@@ -100,6 +107,20 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       const code = pgErrorCode(err);
       if (code === '23P01') {
+        // The overlap might be the guest's OWN abandoned pending (they reloaded
+        // the payment page). Free only their own overlapping pending — never
+        // someone else's — and retry once, so they aren't locked out for 30 min.
+        if (!recycledOwnPending) {
+          recycledOwnPending = true;
+          const freed = await sql`
+            update bookings set status = 'expired'
+            where apartment_id = ${apartmentId} and status = 'pending_payment'
+              and guest_email = ${email}
+              and daterange(check_in, check_out) && daterange(${checkIn}::date, ${checkOut}::date)
+            returning id
+          `;
+          if (freed.length > 0) continue;
+        }
         return jsonError(409, 'dates_just_taken');
       }
       if (code !== '23505') {

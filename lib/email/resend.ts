@@ -32,12 +32,20 @@ export async function sendEmail(mail: OutgoingEmail): Promise<void> {
   const from = process.env.BOOKING_FROM_EMAIL;
   if (!from) throw new Error('BOOKING_FROM_EMAIL is not set');
 
-  const { error } = await resend.emails.send({
+  // Cap the call: sendEmail runs inside the Stripe webhook, and a hung Resend
+  // request must not block the handler until the platform kills it (which would
+  // trigger provider-side retries). The caller catches — a timeout just means
+  // "email not sent", never a wrong booking status.
+  const send = resend.emails.send({
     from: `Little Heart Guesthouse <${from}>`,
     to: mail.to,
     subject: mail.subject,
     html: mail.html,
     text: mail.text,
   });
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Resend timed out after 10s')), 10_000)
+  );
+  const { error } = await Promise.race([send, timeout]);
   if (error) throw new Error(`Resend failed: ${error.message}`);
 }
