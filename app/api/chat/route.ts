@@ -229,43 +229,49 @@ export async function POST(request: Request) {
       messages,
     });
 
-    // Handle tool use - Claude may want to search the web
-    while (response.stop_reason === 'tool_use') {
-      const toolUseBlock = response.content.find(
+    // Handle tool use - Claude may want to search the web.
+    // IMPORTANT: Claude can request SEVERAL searches in one turn (parallel
+    // tool use). Every tool_use id needs a matching tool_result, otherwise
+    // the follow-up request is rejected with a 400.
+    let toolRounds = 0;
+    while (response.stop_reason === 'tool_use' && toolRounds < 3) {
+      toolRounds++;
+      const toolUseBlocks = response.content.filter(
         (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
       );
+      if (toolUseBlocks.length === 0) break;
 
-      if (!toolUseBlock || toolUseBlock.name !== 'search_web') {
-        break;
+      const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      for (const toolUseBlock of toolUseBlocks) {
+        let toolResult = 'No results found for this search query.';
+        if (toolUseBlock.name === 'search_web') {
+          const searchQuery = (toolUseBlock.input as { query: string }).query;
+          // A failing search must degrade the answer, never crash the chat
+          const searchResult = await searchWeb(searchQuery, detectedLanguage).catch((err) => {
+            console.error('search_web failed:', err);
+            return null;
+          });
+          if (searchResult) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
+            toolResult = `Web search results (${dateStr}):\n\n${searchResult.results}\n\nSources: ${searchResult.sources.slice(0, 2).join(', ')}`;
+          }
+        }
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: toolUseBlock.id,
+          content: toolResult,
+        });
       }
 
-      // Execute the web search
-      const searchQuery = (toolUseBlock.input as { query: string }).query;
-      const searchResult = await searchWeb(searchQuery, detectedLanguage);
-
-      let toolResult: string;
-      if (searchResult) {
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
-        toolResult = `Web search results (${dateStr}):\n\n${searchResult.results}\n\nSources: ${searchResult.sources.slice(0, 2).join(', ')}`;
-      } else {
-        toolResult = 'No results found for this search query.';
-      }
-
-      // Continue the conversation with the tool result
+      // Continue the conversation with one result per tool call
       messages.push({
         role: 'assistant',
         content: response.content,
       });
       messages.push({
         role: 'user',
-        content: [
-          {
-            type: 'tool_result',
-            tool_use_id: toolUseBlock.id,
-            content: toolResult,
-          },
-        ],
+        content: toolResults,
       });
 
       // Call Claude again with the search results
