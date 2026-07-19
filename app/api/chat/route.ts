@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getSql } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 import { retrieveContext, shouldSuggestDiana, shouldSuggestBooking } from '@/lib/rag/retrieval';
 import { buildSystemPrompt } from '@/lib/rag/prompts';
 import { searchWeb } from '@/lib/rag/web-search';
@@ -115,6 +116,12 @@ function detectLanguage(text: string): string {
 
 export async function POST(request: Request) {
   try {
+    // Every request costs OpenAI + Anthropic (+ possibly Tavily) calls —
+    // bound it per IP. 30 messages per 15 min is far above real guest usage.
+    if (!(await rateLimit('chat', request, 30, 900))) {
+      return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+    }
+
     const body: ChatRequest = await request.json();
     const { sessionId, locale } = body;
 

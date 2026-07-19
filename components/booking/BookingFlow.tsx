@@ -80,6 +80,8 @@ export default function BookingFlow({
           return t('errors.dates_just_taken');
         case 'booking_inactive':
           return t('errors.booking_inactive');
+        case 'rate_limited':
+          return t('errors.rate_limited');
         default:
           return t('errors.generic');
       }

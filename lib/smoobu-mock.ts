@@ -94,6 +94,11 @@ const mock: SmoobuApi = {
     }
     return null;
   },
+
+  async getReservation(id) {
+    const r = reservations.get(id);
+    return r ? { id: r.id, cancelled: false } : null; // cancelled ones are deleted in the mock
+  },
 };
 
 export function getSmoobuMock(): SmoobuApi {

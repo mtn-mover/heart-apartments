@@ -280,11 +280,16 @@ npx tsx scripts/reset-test-bookings.ts --yes  # Test-Buchungen löschen (NUR vor
 stripe listen --forward-to localhost:3005/api/booking/webhooks/stripe  # lokale Webhooks
 ```
 
-### Phasen-Status (Juli 2026)
-- [x] Phase 0+1: Kern komplett gebaut, Build grün, Pricing-Tests grün, Migration gegen Postgres 17 verifiziert
-- [ ] Migration in Supabase einspielen (SQL Editor) + Seed + test-double-booking
-- [ ] Stripe-Testkeys → lokale E2E-Testbuchung (Mock-Smoobu)
-- [x] Phase 3: Website-Integration (BookingCTA, Contact, Header-Nav, Chatbot-Buttons)
-- [ ] Phase 2: Smoobu echt (Diana-Onboarding: Konto, Airbnb verbinden, Booking.com-Listings, API-Key; dann Auth-Header/Webhook-Format gegen docs.smoobu.com verifizieren — Achtung: Api-Key-Auth wird Sept 2026 von HMAC abgelöst)
-- [ ] Phase 4: Härtung + Go-Live (Live-Keys, Resend-Domain DKIM, property_config.active=true erst nur HEART1)
-- Offen mit Diana: Kurtaxe-Satz (Seed 3.20), Endreinigung, Rabatt-% (Seed 10), Mindestnächte, AGB/Storno-Text
+### Status (19.07.2026): FERTIG GEBAUT — Rest siehe GO-LIVE.md
+- DB = **Neon** (little-heart-db, Vercel-Marketplace); Migrationen: `npx tsx scripts/db-migrate.ts`
+- 3-fach-Review (CodeRabbit + Security + Stabilität) komplett gefixt, inkl. kritischem
+  Neon-Date-Parser-Bug (lib/db.ts types.setTypeParser) und Webhook-Härtung
+- **Rate-Limiting** DB-basiert (lib/rate-limit.ts + rate_limits-Tabelle): create 8/15min,
+  quote 60/15min, chat 30/15min pro IP; fail-open
+- **Buchungsbedingungen**: /booking-terms (ENTWURF! Diana muss Storno-Regeln freigeben,
+  Texte in messages/*.json bookingTerms) + Pflicht-Checkbox im GuestForm
+- Smoobu-Webhook verifiziert Stornos per API-Re-Fetch (fail closed)
+- Tests: test-pricing, test-double-booking, test-booking-flow (E2E-Mock-Kette),
+  test-rate-limit — alle grün gegen Neon
+- **Verbleibende Schritte bis zur ersten echten Buchung: GO-LIVE.md** (Stripe-Keys,
+  Smoobu-Onboarding, Resend, Diana-Inhalte, Cutover)

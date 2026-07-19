@@ -235,9 +235,26 @@
       "past_date": "Check-in must be in the future.",
       "beyond_horizon": "Bookings are possible up to 18 months ahead.",
       "booking_inactive": "Online booking is currently unavailable for this apartment.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "rate_limited": "Too many requests — please wait a moment and try again."
     },
     "confTimeoutTitle": "Almost there…",
     "confTimeoutText": "Your payment went through and we're finalising the booking. You'll receive a confirmation email shortly. If anything is unclear, contact us with your reference below."
+  },
+  "bookingTerms": {
+    "title": "Booking Terms — Direct Bookings",
+    "intro": "These terms apply to bookings made directly on this website. Bookings via Airbnb or Booking.com follow the terms of those platforms.",
+    "draftNote": "Draft — final wording to be confirmed by the host.",
+    "s1Title": "1. Booking & payment",
+    "s1Text": "A booking is confirmed once payment has been completed and you have received a confirmation email with your booking reference (LH-…). Prices include the direct-booking discount shown at checkout; the city tax and any cleaning fee are itemised before payment. Payment is processed securely by Stripe — we never see your card details.",
+    "s2Title": "2. Cancellation",
+    "s2Text": "Cancellations are handled personally: reply to your confirmation email or contact us with your booking reference. Free cancellation up to 7 days before arrival (full refund). Within 7 days of arrival, the first night is charged; no-shows are charged in full. Refunds are returned to the original payment method within 5–10 business days.",
+    "s3Title": "3. Check-in & house rules",
+    "s3Text": "Check-in from 16:00 (self check-in), check-out until 10:00. The apartments are non-smoking; parties are not permitted. Please treat the apartment with care — you are liable for damage beyond normal wear and tear.",
+    "s4Title": "4. Your data",
+    "s4Text": "We store the details you enter (name, email, phone, stay dates) to manage your booking, synchronise our calendar and send you booking-related emails. Data is processed by Stripe (payment), Smoobu (calendar) and Resend (email) solely for these purposes. We do not sell your data.",
+    "s5Title": "5. Contact",
+    "s5Text": "Little Heart Guesthouse, Interlaken, Switzerland — reachable via the email address in your booking confirmation.",
+    "accept": "I accept the booking terms"
   }
 }

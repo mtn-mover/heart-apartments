@@ -235,9 +235,26 @@
       "past_date": "Die Anreise muss in der Zukunft liegen.",
       "beyond_horizon": "Buchungen sind bis 18 Monate im Voraus möglich.",
       "booking_inactive": "Die Online-Buchung ist für diese Wohnung derzeit nicht verfügbar.",
-      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "rate_limited": "Zu viele Anfragen — bitte warten Sie einen Moment und versuchen Sie es erneut."
     },
     "confTimeoutTitle": "Fast geschafft…",
     "confTimeoutText": "Ihre Zahlung war erfolgreich und wir schliessen die Buchung ab. Sie erhalten in Kürze eine Bestätigungs-E-Mail. Bei Fragen kontaktieren Sie uns mit Ihrer Referenz unten."
+  },
+  "bookingTerms": {
+    "title": "Buchungsbedingungen — Direktbuchungen",
+    "intro": "Diese Bedingungen gelten für Buchungen direkt über diese Website. Für Buchungen über Airbnb oder Booking.com gelten die Bedingungen der jeweiligen Plattform.",
+    "draftNote": "Entwurf — endgültiger Wortlaut wird von der Gastgeberin bestätigt.",
+    "s1Title": "1. Buchung & Zahlung",
+    "s1Text": "Eine Buchung ist bestätigt, sobald die Zahlung abgeschlossen ist und Sie eine Bestätigungs-E-Mail mit Ihrer Buchungsreferenz (LH-…) erhalten haben. Die Preise enthalten den beim Checkout ausgewiesenen Direktbuchungs-Rabatt; Kurtaxe und allfällige Endreinigung werden vor der Zahlung einzeln ausgewiesen. Die Zahlung wird sicher über Stripe abgewickelt — Ihre Kartendaten sehen wir nie.",
+    "s2Title": "2. Stornierung",
+    "s2Text": "Stornierungen laufen persönlich: Antworten Sie auf Ihre Bestätigungs-E-Mail oder kontaktieren Sie uns mit Ihrer Buchungsreferenz. Kostenlose Stornierung bis 7 Tage vor Anreise (volle Rückerstattung). Innerhalb von 7 Tagen vor Anreise wird die erste Nacht verrechnet; bei Nichtanreise (No-Show) der volle Betrag. Rückerstattungen erfolgen innert 5–10 Werktagen auf das ursprüngliche Zahlungsmittel.",
+    "s3Title": "3. Check-in & Hausregeln",
+    "s3Text": "Check-in ab 16:00 Uhr (Self Check-in), Check-out bis 10:00 Uhr. Die Wohnungen sind Nichtraucher-Wohnungen; Partys sind nicht gestattet. Bitte behandeln Sie die Wohnung sorgfältig — für Schäden über die normale Abnutzung hinaus haften Sie.",
+    "s4Title": "4. Ihre Daten",
+    "s4Text": "Wir speichern die von Ihnen eingegebenen Angaben (Name, E-Mail, Telefon, Reisedaten) zur Abwicklung Ihrer Buchung, zur Kalender-Synchronisation und für buchungsbezogene E-Mails. Die Verarbeitung erfolgt durch Stripe (Zahlung), Smoobu (Kalender) und Resend (E-Mail) ausschliesslich zu diesen Zwecken. Wir verkaufen Ihre Daten nicht.",
+    "s5Title": "5. Kontakt",
+    "s5Text": "Little Heart Guesthouse, Interlaken, Schweiz — erreichbar über die E-Mail-Adresse in Ihrer Buchungsbestätigung.",
+    "accept": "Ich akzeptiere die Buchungsbedingungen"
   }
 }

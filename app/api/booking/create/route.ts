@@ -12,6 +12,7 @@ import {
 } from '@/lib/booking/service';
 import { getSql, pgErrorCode } from '@/lib/db';
 import type { BookingRow } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/booking/create
@@ -26,6 +27,12 @@ import type { BookingRow } from '@/lib/db';
  *   an automatic refund in the webhook's failure path
  */
 export async function POST(req: NextRequest) {
+  // Each accepted request can hold a calendar range for 30 min and creates a
+  // Stripe PaymentIntent — keep that expensive path per-IP limited.
+  if (!(await rateLimit('book-create', req, 8, 900))) {
+    return jsonError(429, 'rate_limited');
+  }
+
   let body: Record<string, unknown>;
   try {
     const parsed: unknown = await req.json();

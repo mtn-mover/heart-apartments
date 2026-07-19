@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export interface GuestData {
   firstName: string;
@@ -23,6 +24,7 @@ const inputClass =
 
 export default function GuestForm({ value, onChange, onSubmit, submitting }: Props) {
   const t = useTranslations('booking');
+  const tTerms = useTranslations('bookingTerms');
 
   return (
     <form
@@ -104,6 +106,18 @@ export default function GuestForm({ value, onChange, onSubmit, submitting }: Pro
           onChange={(e) => onChange({ message: e.target.value })}
         />
       </div>
+      <label className="flex items-start gap-2.5 text-sm text-slate-600 cursor-pointer">
+        <input type="checkbox" required className="mt-0.5 h-4 w-4 accent-heart-coral-500" />
+        <span>
+          <Link
+            href="/booking-terms"
+            target="_blank"
+            className="underline hover:text-heart-coral-600"
+          >
+            {tTerms('accept')}
+          </Link>
+        </span>
+      </label>
       <button
         type="submit"
         disabled={submitting}

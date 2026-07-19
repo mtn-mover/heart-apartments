@@ -2,12 +2,19 @@ import { NextRequest } from 'next/server';
 import { getSmoobu } from '@/lib/smoobu';
 import { computeQuote, QuoteError } from '@/lib/booking/pricing';
 import { jsonError, loadPropertyConfig, resolveSmoobuPropertyId } from '@/lib/booking/service';
+import { rateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/booking/quote { apartmentId, checkIn, checkOut, adults, children }
  * Live server-side price for a stay. No side effects.
  */
 export async function POST(req: NextRequest) {
+  // Generous (the UI quotes on every date change) but bounded — each call
+  // hits the Smoobu rates API.
+  if (!(await rateLimit('book-quote', req, 60, 900))) {
+    return jsonError(429, 'rate_limited');
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

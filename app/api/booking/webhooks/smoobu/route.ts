@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { jsonError } from '@/lib/booking/service';
+import { getSmoobu } from '@/lib/smoobu';
 import { sendEmail } from '@/lib/email/resend';
 import { hostCancellationEmail } from '@/lib/email/templates';
 import { getSql, pgErrorCode } from '@/lib/db';
@@ -14,8 +15,9 @@ import type { BookingRow } from '@/lib/db';
  * + email Diana) — no money moves based on this endpoint. OTA bookings are
  * NOT mirrored here; Smoobu stays their source of truth.
  *
- * Phase 2: verify the exact action names / payload shape against a real
- * account and add an API re-fetch of the reservation before processing.
+ * Cancellations are verified against the Smoobu API before processing (fail
+ * closed). Phase 2 with a real account: verify the exact action names /
+ * payload / cancellation-marker fields against docs.smoobu.com.
  */
 function tokenMatches(provided: string, expected: string): boolean {
   const a = Buffer.from(provided);
@@ -56,6 +58,22 @@ export async function POST(req: NextRequest) {
   }
 
   if (action === 'cancelReservation' && reservationId > 0) {
+    // Never trust the payload alone: confirm via the API that this reservation
+    // is really gone/cancelled before touching our booking. Fail closed — if
+    // Smoobu says it still exists uncancelled, ignore the webhook.
+    try {
+      const current = await getSmoobu().getReservation(reservationId);
+      if (current && !current.cancelled) {
+        console.warn(
+          `[smoobu-webhook] cancelReservation for ${reservationId}, but API says it is still active — ignoring`
+        );
+        return Response.json({ received: true, ignored: true });
+      }
+    } catch (err) {
+      console.error('[smoobu-webhook] verification fetch failed, ignoring event:', err);
+      return Response.json({ received: true, ignored: true });
+    }
+
     const rows = await sql`
       update bookings set status = 'cancelled'
       where smoobu_reservation_id = ${reservationId} and status = 'confirmed'

@@ -48,6 +48,9 @@ export interface SmoobuApi {
     reference: string,
     range: { from: string; to: string }
   ): Promise<{ id: number } | null>;
+  /** Single reservation by id, null when it doesn't exist (404). Used by the
+   *  Smoobu webhook to verify a payload against the API before acting on it. */
+  getReservation(id: number): Promise<{ id: number; cancelled: boolean } | null>;
 }
 
 export class SmoobuError extends Error {
@@ -184,6 +187,23 @@ const realClient: SmoobuApi = {
     };
     const match = raw?.bookings?.find((b) => b.notice?.includes(reference));
     return match ? { id: match.id } : null;
+  },
+
+  async getReservation(id) {
+    try {
+      // Cancelled reservations come back with is-blocked-booking/type markers;
+      // verify field names against docs.smoobu.com in phase 2. A 404 (deleted)
+      // is treated as cancelled=true by the caller via null.
+      const raw = (await request('GET', `/reservations/${id}`, undefined, true)) as {
+        id?: number;
+        type?: string | null;
+      };
+      if (typeof raw?.id !== 'number') return null;
+      return { id: raw.id, cancelled: raw.type === 'cancellation' };
+    } catch (err) {
+      if (err instanceof SmoobuError && err.status === 404) return null;
+      throw err;
+    }
   },
 };
 
