@@ -105,17 +105,54 @@ async function testChat(testCase: TestCase): Promise<void> {
 
     const systemPrompt = buildSystemPrompt(testCase.locale, chunks, avgSimilarity);
 
-    // Call Claude
-    const response = await anthropic.messages.create({
+    // Call Claude — declare the search tool like the real route does (the
+    // system prompt demands it for attraction questions); tool calls get a
+    // stub result so the test never needs Tavily.
+    const searchTool = {
+      name: 'search_web',
+      description: 'Search the web for current information.',
+      input_schema: {
+        type: 'object' as const,
+        properties: { query: { type: 'string' } },
+        required: ['query'],
+      },
+    };
+    let response = await anthropic.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 500,
       system: systemPrompt,
+      tools: [searchTool],
       messages: [{ role: 'user', content: testCase.message }],
     });
 
-    const assistantResponse = response.content[0].type === 'text'
-      ? response.content[0].text
-      : '';
+    if (response.stop_reason === 'tool_use') {
+      const toolUses = response.content.filter((b) => b.type === 'tool_use');
+      console.log(`  (search_web aufgerufen: ${toolUses.map((t) => JSON.stringify((t as { input: unknown }).input)).join(', ')})`);
+      response = await anthropic.messages.create({
+        model: 'claude-sonnet-5',
+        max_tokens: 500,
+        system: systemPrompt,
+        tools: [searchTool],
+        tool_choice: { type: 'none' },
+        messages: [
+          { role: 'user', content: testCase.message },
+          { role: 'assistant', content: response.content },
+          {
+            role: 'user',
+            content: toolUses.map((t) => ({
+              type: 'tool_result' as const,
+              tool_use_id: (t as { id: string }).id,
+              content: 'Websuche im Test deaktiviert — antworte mit deinem vorhandenen Wissen und sage dazu, dass aktuelle Angaben zu prüfen sind.',
+            })),
+          },
+        ],
+      });
+    }
+
+    const assistantResponse = response.content
+      .filter((b) => b.type === 'text')
+      .map((b) => ('text' in b ? b.text : ''))
+      .join('');
 
     console.log(`\nAntwort:\n${assistantResponse}`);
     console.log('='.repeat(60));

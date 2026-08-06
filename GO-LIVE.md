@@ -35,8 +35,10 @@ Buchung, in sinnvoller Reihenfolge.
 
 ## D. Inhalte von Diana
 
-- [ ] Bot_Info-Word-Dokumente neu liefern → in `Bot_Info/` legen →
-      `npx tsx scripts/ingest-documents.ts`
+- [x] Bot_Info-Word-Dokumente: 3 von Diana erhalten und am 06.08. ingested
+      (HEART1-4/W1-W4: 22 Chunks, HEART5/GG18: 21, HEART4-Heizung: 1;
+      Ingest liest jetzt ALLE .docx in `Bot_Info/`, W↔HEART-Mapping im Prompt).
+      Noch offen: das alte 4. Dokument «Diverse Links.docx» (falls noch relevant)
 - [ ] Zahlen bestätigen (in `property_config` pflegen): Kurtaxe
       (Seed 3.20 CHF/Erw./Nacht — **plus Beherbergungsabgabe CHF 1 ab 16 J. prüfen**,
       Quelle interlaken.swiss), Endreinigung je Wohnung, Direktrabatt-% (Seed 10),

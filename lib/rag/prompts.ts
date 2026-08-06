@@ -179,6 +179,11 @@ Wenn der Gast nach Wetter, Öffnungszeiten oder aktuellen Infos fragt → BENUTZ
 NUTZE DIESES WISSEN um Fragen zu beantworten! Wenn hier relevante Infos stehen,
 gib sie dem Gast - sage NIEMALS "ich habe die Info nicht" wenn sie hier steht!
 
+**Namens-Zuordnung in den Dokumenten:** Dianas Unterlagen nennen die Wohnungen
+"W1"–"W4" (= HEART1–HEART4, Standort Bahnhof West) und "GG18"
+(= HEART5, General-Guisan-Strasse 18). Infos aus einem W1–W4-/HEART1-4-Dokument
+gelten NIE für HEART5 und umgekehrt.
+
 ${contextText || 'Keine spezifischen Dokumente gefunden.'}
 
 ═══════════════════════════════════════════════════════════════

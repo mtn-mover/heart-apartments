@@ -111,6 +111,14 @@ async function ingestDocument(filePath: string): Promise<void> {
   const content = await extractDocx(filePath);
   const chunks = chunkDocument(content, fileName);
 
+  // Anchor every chunk to its document: Diana's docs say "W4"/"GG18" while
+  // guests ask about "HEART4"/"HEART5" — the filename carries the mapping
+  // into the embedding and the prompt context.
+  const docLabel = fileName.replace(/\.docx$/i, '');
+  for (const chunk of chunks) {
+    chunk.content = `[Dokument: ${docLabel}]\n${chunk.content}`;
+  }
+
   console.log(`  Found ${chunks.length} chunks`);
 
   for (const chunk of chunks) {
@@ -217,26 +225,23 @@ async function main(): Promise<void> {
   // Clear existing documents
   await clearDocuments();
 
-  // Path to Bot_Info folder
+  // Ingest every .docx in Bot_Info/ (folder is gitignored — the docs contain
+  // WiFi passwords etc.). Name files so the apartment mapping is explicit,
+  // e.g. "Wohnungsinfo HEART5 (GG18).docx" — the filename is prefixed into
+  // every chunk and therefore into embeddings and the prompt context.
   const botInfoDir = path.join(process.cwd(), 'Bot_Info');
+  let docFiles: string[] = [];
+  try {
+    docFiles = (await fs.readdir(botInfoDir)).filter((f) => f.toLowerCase().endsWith('.docx')).sort();
+  } catch {
+    console.log('  Bot_Info/ not found — ingesting apartment data only.');
+  }
+  if (docFiles.length === 0) {
+    console.log('  No .docx files in Bot_Info/ — ingesting apartment data only.');
+  }
 
-  // Document files to process
-  const docFiles = [
-    'Wohnungsinfo heart 1-4.docx',
-    'Wohnungsinfo Heart 5.docx',
-    'heart 4 elektrische Heizung in Bad und kl. Zimmer.docx',
-    'Diverse Links.docx',
-  ];
-
-  // Process each document
   for (const file of docFiles) {
-    const filePath = path.join(botInfoDir, file);
-    try {
-      await fs.access(filePath);
-      await ingestDocument(filePath);
-    } catch {
-      console.log(`  Skipping (not found): ${file}`);
-    }
+    await ingestDocument(path.join(botInfoDir, file));
   }
 
   // Ingest apartment data
